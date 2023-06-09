@@ -1,0 +1,30 @@
+<p>auth-user works!</p>
+<div>
+    <div class="submit-form">
+        <div class="form-group">
+          <label for="userid">User ID</label>
+          <input
+            type="text"
+            class="form-control"
+            id="userid"
+            required
+            [(ngModel)]="user.userid"
+            name="userid"
+          />
+        </div>
+  
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input
+            class="form-control"
+            id="password"
+            required
+            [(ngModel)]="user.password"
+            name="password"
+          />
+        </div>
+  
+        <!-- <button (click)="signupUser()" class="btn btn-success">Register</button> -->
+        <button class="btn btn-success" (click)="signinUser()">Signin</button>
+    </div>
+  </div>

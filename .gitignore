@@ -8,3 +8,6 @@ cypress/videos
 .DS_Store
 
 .idea
+.vs
+obj
+bin
