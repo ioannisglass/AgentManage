@@ -1,5 +1,7 @@
 import mysql.connector
 from datetime import datetime
+import uuid
+import secrets
 
 DATABASES = {
     'default': {
@@ -36,10 +38,76 @@ class AgentManage():
         if ds == None or len(ds) == 0:
             return None
         else:
-            return ds[0]
+            return {
+                "id": ds[0][0],
+                "email": ds[0][1],
+                "password": ds[0][2],
+                "cusid": ds[0][3],
+                "created_at": ds[0][4],
+                "updated_at": ds[0][5],
+                "name": ds[0][6],
+                "role": ds[0][7]
+            }
+        
+    def getUserByEmail(self, email):
+        query = f"SELECT * FROM tbl_users WHERE email = '{email}';"
+        self.my_cursor.execute(query)
+        ds = self.my_cursor.fetchall()
+        if ds == None or len(ds) == 0:
+            return None
+        else:
+            return {
+                "id": ds[0][0],
+                "email": ds[0][1],
+                "password": ds[0][2],
+                "cusid": ds[0][3],
+                "created_at": ds[0][4],
+                "updated_at": ds[0][5],
+                "name": ds[0][6],
+                "role": ds[0][7]
+            }
+    
+    def addUser(self, email, password, name, role):
+        customer_id = str(uuid.uuid1())
+        action_at = datetime.now().strftime("%m/%d/%Y %H:%M:%S")
+        query = f"INSERT INTO tbl_users (email, password, cusid, created_at, updated_at, name, role) " + \
+            f"VALUES ('{email}', '{password}', '{customer_id}', '{action_at}', '{action_at}', '{name}', {role});"
+        self.my_cursor.execute(query)
+        self.my_db.commit()
+        
+    def editUserByID(self, userrid, name):
+        try:
+            action_at = datetime.now().strftime("%m/%d/%Y %H:%M:%S")
+            update_query = f"UPDATE `tbl_users` SET `name` = '{name}', `updated_at` = '{action_at}' " + \
+                f"WHERE `id` = {userrid};"
+            self.my_cursor.execute(update_query)
+            self.my_db.commit()
+            return True
+        except Exception as ee:
+            print(ee)
+            return False
+        
+    def getUsers(self):
+        query = f"SELECT * FROM tbl_users WHERE role = 0;"
+        self.my_cursor.execute(query)
+        ds = self.my_cursor.fetchall()
+        ret = []
+        if ds != None and len(ds) > 0:
+            for row in ds:
+                ret.append({
+                    "id": row[0],
+                    "email": row[1],
+                    "password": row[2],
+                    "cusid": row[3],
+                    "created_at": row[4],
+                    "updated_at": row[5],
+                    "name": row[6],
+                    "role": row[7]
+                })
+        return ret
         
     def signIn(self, email, password):
-        query = f"SELECT cusid FROM tbl_users WHERE email = '{email}' AND password = '{password}';"
+        query = f"SELECT id, cusid, role FROM tbl_users WHERE email = '{email}' AND password = '{password}';"
         self.my_cursor.execute(query)
         ds = self.my_cursor.fetchall()
         ret = {}
@@ -47,8 +115,11 @@ class AgentManage():
             ret["cusid"] = ""
             ret["status"] = "0"
             ret["message"] = "Invalid credential."
+            ret["role"] = 0
         else:
-            ret["cusid"] = str(ds[0][0])
+            ret["id"] = str(ds[0][0])
+            ret["cusid"] = str(ds[0][1])
+            ret["role"] = str(ds[0][2])
             ret["status"] = "2"
             ret["message"] = "Sign In Success"
         return ret
@@ -61,6 +132,7 @@ class AgentManage():
         if ds != None and len(ds) > 0:
             for row in ds:
                 ret.append({
+                    "id": row[0],
                     "title": row[6],
                     "actkey" : row[2],
                     "created" : row[4],
@@ -68,6 +140,50 @@ class AgentManage():
                     "agents": row[7]
                 })
         return ret
+    
+    def getActkeyByRowId(self, rowid):
+        query = f"SELECT * FROM tbl_actkeys WHERE id = {rowid};"
+        self.my_cursor.execute(query)
+        ds = self.my_cursor.fetchall()
+        ret = []
+        if ds != None and len(ds) > 0:
+            return {
+                "id": ds[0][0],
+                "userid": ds[0][1],
+                "actkey": ds[0][2],
+                "status": ds[0][3],
+                "created_at": ds[0][4],
+                "updated_at": ds[0][5],
+                "title": ds[0][6]
+            }
+        else:
+            return None
+
+    # edit the status of Activation Key with Row ID    
+    def editActkeyStatus(self, rowid, status):
+        try:
+            action_at = datetime.now().strftime("%m/%d/%Y %H:%M:%S")
+            update_query = f"UPDATE `tbl_actkeys` SET `status` = {status}, `updated_at` = '{action_at}' " + \
+                f"WHERE `id` = {rowid};"
+            self.my_cursor.execute(update_query)
+            self.my_db.commit()
+            return True
+        except Exception as ee:
+            print(ee)
+            return False
+        
+    def addNewActkey(self, userid, title):
+        try:
+            action_at = datetime.now().strftime("%m/%d/%Y %H:%M:%S")
+            actkey = secrets.token_hex(16)
+            query = f"INSERT INTO tbl_actkeys (userid, actkey, status, created_at, updated_at, title) " + \
+                f"VALUES ({userid}, '{actkey}', 2, '{action_at}', '{action_at}', '{title}');"
+            self.my_cursor.execute(query)
+            self.my_db.commit()
+            return True
+        except Exception as ee:
+            print(ee)
+            return False
                 
     def isActivated(self, cusid, actkey):
         query = f"SELECT tbl_users.*, tbl_actkeys.actkey FROM tbl_users LEFT JOIN tbl_actkeys " + \
@@ -130,25 +246,28 @@ class AgentManage():
         self.my_cursor.execute(delete_query)
         self.my_db.commit()
         # add the installed apps to tbl_installedapps
-        query = f"INSERT INTO tbl_installedapps (name, version, agentid) VALUES "
-        first_line = True
-        for installed_app in installedApps:
-            name = installed_app["displayName"]
-            version = installed_app["displayVersion"]
-            sub_query = f"('{name}', '{version}', '{agentrid}')"
-            if first_line == False:
-                query = query + ', '
-            query = query + sub_query
-            first_line = False
-        query += ';'
-        self.my_cursor.execute(query)
-        self.my_db.commit()
+        if installedApps != None and len(installedApps) > 0:
+            query = f"INSERT INTO tbl_installedapps (name, version, agentid) VALUES "
+            first_line = True
+            for installed_app in installedApps:
+                name = installed_app["displayName"]
+                version = installed_app["displayVersion"]
+                sub_query = f"('{name}', '{version}', '{agentrid}')"
+                if first_line == False:
+                    query = query + ', '
+                query = query + sub_query
+                first_line = False
+            query += ';'
+            self.my_cursor.execute(query)
+            self.my_db.commit()
         return True
     
-    def getAgents(self, actkeyrowid, cusrowid):
-        query = f"SELECT tbl_agents.* FROM tbl_agents LEFT JOIN tbl_actkeys " + \
-            f"ON tbl_agents.actkeyid = tbl_actkeys.id LEFT JOIN tbl_users ON tbl_users.id = tbl_actkeys.userid " + \
-            f"WHERE tbl_actkeys.id = {actkeyrowid} AND tbl_users.id = {cusrowid};"
+    def getAgents(self, actkeyrowid):
+        # query = f"SELECT tbl_agents.* FROM tbl_agents LEFT JOIN tbl_actkeys " + \
+        #     f"ON tbl_agents.actkeyid = tbl_actkeys.id LEFT JOIN tbl_users ON tbl_users.id = tbl_actkeys.userid " + \
+        #     f"WHERE tbl_actkeys.id = {actkeyrowid} AND tbl_users.id = {cusrowid};"
+        query = f"SELECT * FROM tbl_agents " + \
+            f"WHERE actkeyid = {actkeyrowid};"
         self.my_cursor.execute(query)
         ds = self.my_cursor.fetchall()
         ret = []
@@ -163,6 +282,17 @@ class AgentManage():
                 })
         return ret
     
+    # By Row ID, get the Agent from database
+    def getAgentByID(self, rowid):
+        query = f"SELECT * FROM tbl_agents WHERE id = {rowid};"
+        self.my_cursor.execute(query)
+        ds = self.my_cursor.fetchall()
+        ret = []
+        if ds != None and len(ds) > 0:
+            return ds[0]
+        else:
+            return None
+    
     def getAgentApps(self, agentid):
         query = f"SELECT * FROM `tbl_installedapps` WHERE agentid = {agentid};"
         self.my_cursor.execute(query)
@@ -175,3 +305,28 @@ class AgentManage():
                     "version": row[3],
                 })
         return ret
+    
+    # Get all Applications installed at the all Agents that has the indicated Activation Key
+    def getActkeyAllApps(self, actkey_rid):
+        query = f"SELECT id FROM `tbl_agents` WHERE actkeyid = {actkey_rid};"
+        self.my_cursor.execute(query)
+        ds = self.my_cursor.fetchall()
+        ret = []
+        where_ids = ''
+        if ds != None and len(ds) > 0:
+            for row in ds:
+                where_ids += f"agentid = {row[0]} OR "
+            where_ids = where_ids[:len(where_ids) - 4]
+        if where_ids == '':
+            return ret
+        query = f"SELECT * FROM `tbl_installedapps` WHERE {where_ids};"
+        self.my_cursor.execute(query)
+        ds1 = self.my_cursor.fetchall()
+        if ds1 != None and len(ds1) > 0:
+            for row in ds1:
+                ret.append({
+                    "name": row[2],
+                    "version": row[3],
+                })
+        return ret
+        
