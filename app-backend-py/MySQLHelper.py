@@ -2,6 +2,8 @@ import mysql.connector
 from datetime import datetime
 import uuid
 import secrets
+import random
+import string
 
 DATABASES = {
     'default': {
@@ -31,8 +33,8 @@ class AgentManage():
         )
         self.my_cursor = self.my_db.cursor()
         
-    def getUserByCusID(self, customer_id):
-        query = f"SELECT * FROM tbl_users WHERE cusid = '{customer_id}';"
+    def getUserByID(self, id):
+        query = f"SELECT * FROM tbl_users WHERE id = {id};"
         self.my_cursor.execute(query)
         ds = self.my_cursor.fetchall()
         if ds == None or len(ds) == 0:
@@ -67,14 +69,104 @@ class AgentManage():
                 "role": ds[0][7]
             }
     
-    def addUser(self, email, password, name, role):
-        customer_id = str(uuid.uuid1())
+    def addUser(self, email, password, name, role, company_id):
         action_at = datetime.now().strftime("%m/%d/%Y %H:%M:%S")
         query = f"INSERT INTO tbl_users (email, password, cusid, created_at, updated_at, name, role) " + \
-            f"VALUES ('{email}', '{password}', '{customer_id}', '{action_at}', '{action_at}', '{name}', {role});"
+            f"VALUES ('{email}', '{password}', {company_id}, '{action_at}', '{action_at}', '{name}', {role});"
         self.my_cursor.execute(query)
         self.my_db.commit()
         
+    # register company and its domain
+    def register_domain(self, name, domain):
+        sel_query = f"SELECT * FROM tbl_companies WHERE `name` = '{name}' OR `domain` = '{domain}';"
+        self.my_cursor.execute(sel_query)
+        ds = self.my_cursor.fetchall()
+        action_at = datetime.now().strftime("%m/%d/%Y %H:%M:%S")
+        if ds != None and len(ds) > 0:
+            return {
+                "id": ds[0][0],
+                "name": ds[0][1],
+                "domain": ds[0][2],
+                "customerid": ds[0][3],
+                "created_at": ds[0][4],
+                "updated_at": ds[0][5],
+            }
+        else:
+            new_customerid = self.generate_customer_id()
+            if new_customerid == '':
+                return None
+            query = f"INSERT INTO tbl_companies (`name`, `domain`, `cusid`, `created_at`, `updated_at`) " + \
+                f"VALUES ('{name}', '{domain}', '{new_customerid}', '{action_at}', '{action_at}');"
+            self.my_cursor.execute(query)
+            self.my_db.commit()
+            
+            self.my_cursor.execute(sel_query)
+            ds = self.my_cursor.fetchall()
+            return {
+                "id": ds[0][0],
+                "name": ds[0][1],
+                "domain": ds[0][2],
+                "customerid": ds[0][3],
+                "created_at": ds[0][4],
+                "updated_at": ds[0][5],
+            }
+            
+    # get company from domain
+    def get_company_by_domain(self, domain):
+        sel_query = f"SELECT * FROM tbl_companies WHERE `domain` = '{domain}';"
+        self.my_cursor.execute(sel_query)
+        ds = self.my_cursor.fetchall()
+        if ds != None and len(ds) > 0:
+            return {
+                "id": ds[0][0],
+                "name": ds[0][1],
+                "domain": ds[0][2],
+                "customerid": ds[0][3],
+                "created_at": ds[0][4],
+                "updated_at": ds[0][5],
+            }
+        else:
+            return None
+        
+    # get all domains
+    def get_all_companies(self):
+        sel_query = f"SELECT * FROM tbl_companies;"
+        self.my_cursor.execute(sel_query)
+        ds = self.my_cursor.fetchall()
+        ret = []
+        if ds != None and len(ds) > 0:
+            for row in ds:
+                ret.append({
+                    "id": row[0],
+                    "name": row[1],
+                    "domain": row[2],
+                    "customerid": row[3],
+                    "created_at": row[4],
+                    "updated_at": row[5],
+                })
+        else:
+            return None
+    
+    # generate unique customer id
+    def generate_customer_id(self):
+        # new_cusid = ''.join(random.choices(string.ascii_letters + string.digits, k=16))
+        # customer_id = str(uuid.uuid1())
+        new_cusid = ''.join(random.choices(string.digits, k=16))
+        total_retry = 0
+        while True:
+            query = f"SELECT * FROM tbl_companies WHERE `customerid` = '{new_cusid}';"
+            self.my_cursor.execute(query)
+            ds = self.my_cursor.fetchall()
+            if ds != None and len(ds) > 0:
+                total_retry += 1
+                if total_retry > 10000:
+                    return ''
+                new_cusid = ''.join(random.choices(string.digits, k=16))
+                continue
+            else:
+                break
+        return new_cusid
+    
     def editUserByID(self, userrid, name):
         try:
             action_at = datetime.now().strftime("%m/%d/%Y %H:%M:%S")
@@ -87,8 +179,9 @@ class AgentManage():
             print(ee)
             return False
         
-    def getUsers(self):
-        query = f"SELECT * FROM tbl_users WHERE role = 0;"
+    # get All users by company id
+    def getUsersByDomainRid(self, company_id):
+        query = f"SELECT * FROM tbl_users WHERE `role` = 0 AND `cusid` = {company_id};"
         self.my_cursor.execute(query)
         ds = self.my_cursor.fetchall()
         ret = []
@@ -107,25 +200,32 @@ class AgentManage():
         return ret
         
     def signIn(self, email, password):
-        query = f"SELECT id, cusid, role FROM tbl_users WHERE email = '{email}' AND password = '{password}';"
+        query = f"SELECT tbl_users.id, tbl_users.cusid, tbl_users.role, " +\
+            f"tbl_companies.name, tbl_companies.customerid FROM tbl_users " +\
+            f"ON tbl_companies.cusid = tbl_users.cusid " +\
+            f"WHERE tbl_users.email = '{email}' AND tbl_users.password = '{password}';"
         self.my_cursor.execute(query)
         ds = self.my_cursor.fetchall()
         ret = {}
         if ds == None or len(ds) == 0:
             ret["cusid"] = ""
             ret["status"] = "0"
+            ret["companyname"] = ""
+            ret["customerid"] = ""
             ret["message"] = "Invalid credential."
             ret["role"] = 0
         else:
-            ret["id"] = str(ds[0][0])
-            ret["cusid"] = str(ds[0][1])
-            ret["role"] = str(ds[0][2])
+            ret["id"] = ds[0][0]
+            ret["cusid"] = ds[0][1]
+            ret["role"] = ds[0][2]
+            ret["companyname"] = str(ds[0][3])
+            ret["customerid"] = str(ds[0][4])
             ret["status"] = "2"
             ret["message"] = "Sign In Success"
         return ret
     
-    def getActkeysByUserRowId(self, rowid):
-        query = f"SELECT tbl_actkeys.*, COUNT(tbl_agents.id) as actkeycount FROM tbl_actkeys LEFT JOIN tbl_agents ON tbl_actkeys.id = tbl_agents.actkeyid WHERE tbl_actkeys.userid = {rowid} GROUP BY tbl_actkeys.id;"
+    def getActkeysByCusId(self, cusrid):
+        query = f"SELECT tbl_actkeys.*, COUNT(tbl_agents.id) as actkeycount FROM tbl_actkeys LEFT JOIN tbl_agents ON tbl_actkeys.id = tbl_agents.actkeyid WHERE tbl_actkeys.cusid = {cusrid} GROUP BY tbl_actkeys.id;"
         self.my_cursor.execute(query)
         ds = self.my_cursor.fetchall()
         ret = []
@@ -137,12 +237,14 @@ class AgentManage():
                     "actkey" : row[2],
                     "created" : row[4],
                     "status" : row[3],                 # enabled 2, disabled 1, deleted 0
-                    "agents": row[7]
+                    "agents": row[8],
+                    "created_by": row[7]
                 })
         return ret
     
     def getActkeyByRowId(self, rowid):
-        query = f"SELECT * FROM tbl_actkeys WHERE id = {rowid};"
+        query = f"SELECT tbl_actkeys.*, tbl_users.name FROM tbl_actkeys " +\
+            f"LEFT JOIN tbl_users ON tbl_users.id = tbl_actkeys.created_by WHERE tbl_actkeys.id = {rowid};"
         self.my_cursor.execute(query)
         ds = self.my_cursor.fetchall()
         ret = []
@@ -154,7 +256,8 @@ class AgentManage():
                 "status": ds[0][3],
                 "created_at": ds[0][4],
                 "updated_at": ds[0][5],
-                "title": ds[0][6]
+                "title": ds[0][6],
+                "user": ds[0][7]
             }
         else:
             return None
@@ -172,12 +275,13 @@ class AgentManage():
             print(ee)
             return False
         
-    def addNewActkey(self, userid, title):
+    def addNewActkey(self, userid, title, cusid):
         try:
             action_at = datetime.now().strftime("%m/%d/%Y %H:%M:%S")
-            actkey = secrets.token_hex(16)
-            query = f"INSERT INTO tbl_actkeys (userid, actkey, status, created_at, updated_at, title) " + \
-                f"VALUES ({userid}, '{actkey}', 2, '{action_at}', '{action_at}', '{title}');"
+            # actkey = secrets.token_hex(16)
+            actkey = str(uuid.uuid4())
+            query = f"INSERT INTO tbl_actkeys (cusid, actkey, status, created_at, updated_at, title, created_by) " + \
+                f"VALUES ({cusid}, '{actkey}', 2, '{action_at}', '{action_at}', '{title}', {userid});"
             self.my_cursor.execute(query)
             self.my_db.commit()
             return True
@@ -185,17 +289,17 @@ class AgentManage():
             print(ee)
             return False
                 
-    def isActivated(self, cusid, actkey):
-        query = f"SELECT tbl_users.*, tbl_actkeys.actkey FROM tbl_users LEFT JOIN tbl_actkeys " + \
-            f"ON tbl_actkeys.userid = tbl_users.id WHERE tbl_users.cusid = '{cusid}' " + \
+    def isActivated(self, customerid, actkey):
+        query = f"SELECT tbl_companies.*, tbl_actkeys.actkey FROM tbl_companies LEFT JOIN tbl_actkeys " + \
+            f"ON tbl_actkeys.cusid = tbl_companies.id WHERE tbl_companies.customerid = '{customerid}' " + \
             f"AND tbl_actkeys.actkey = '{actkey}';"
         self.my_cursor.execute(query)
         ds = self.my_cursor.fetchall()
         if ds != None and len(ds) > 0:
             return "2"
         else:
-            query = f"SELECT tbl_users.*, tbl_actkeys.actkey FROM tbl_users LEFT JOIN tbl_actkeys " + \
-                f"ON tbl_actkeys.userid = tbl_users.id WHERE tbl_users.cusid = '{cusid}' " + \
+            query = f"SELECT tbl_companies.*, tbl_actkeys.actkey FROM tbl_users LEFT JOIN tbl_actkeys " + \
+                f"ON tbl_actkeys.cusid = tbl_companies.id WHERE tbl_companies.customerid = '{customerid}' " + \
                 f"AND tbl_actkeys.actkey != '{actkey}';"
             self.my_cursor.execute(query)
             ds = self.my_cursor.fetchall()

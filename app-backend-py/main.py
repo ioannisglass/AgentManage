@@ -12,6 +12,7 @@ from  werkzeug.security import generate_password_hash, check_password_hash
 # from flask_mysqldb import MySQL
 # from flaskext.mysql import MySQL
 from Model.User import User
+import os
 
 SECRET_KEY = "155912E@!FAs"
 
@@ -22,8 +23,12 @@ agentManager = AgentManage(
     "",
     "systemagent"
 )
+UPLOAD_FOLDER = os.path.join(os.getcwd(), "uploads")
+# ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
+
 app = Flask(__name__)
 app.config['SECRET_KEY'] = SECRET_KEY
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://username:password@server/db'
 # db = SQLAlchemy(app)
 CORS(app, support_credentials=True)
@@ -45,7 +50,7 @@ def token_required(f):
         try:
            data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=["HS256"])
            # current_user = Users.query.filter_by(public_id=data['public_id']).first()
-           current_user = agentManager.getUserByCusID(data["cusid"])
+           current_user = agentManager.getUserByID(data["id"])
         except jwt.ExpiredSignatureError:
            return jsonify({'message': 'Signature expired. Please log in again.'})
         except jwt.InvalidTokenError:
@@ -53,6 +58,24 @@ def token_required(f):
  
         return f(current_user, *args, **kwargs)
    return decorator
+
+# @app.route('/', methods=['GET', 'POST'])
+# def upload_file():
+    # if request.method == 'POST':
+    #     # check if the post request has the file part
+    #     if 'file' not in request.files:
+    #         flash('No file part')
+    #         return redirect(request.url)
+    #     file = request.files['file']
+    #     # If the user does not select a file, the browser submits an
+    #     # empty file without a filename.
+    #     if file.filename == '':
+    #         flash('No selected file')
+    #         return redirect(request.url)
+    #     if file and allowed_file(file.filename):
+    #         filename = secure_filename(file.filename)
+    #         file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+    #         return redirect(url_for('download_file', name=filename))
 
 @app.route('/greet')
 def greet():
@@ -78,6 +101,7 @@ def signIn():
         token = jwt.encode({
             'id': ret["id"],
             'cusid': ret["cusid"],
+            'customerid': ret["customerid"],
             'role': ret["role"],
             'exp' : datetime.utcnow() + timedelta(minutes=30)
         }, app.config['SECRET_KEY'], "HS256")
@@ -85,7 +109,6 @@ def signIn():
             'token' : token,
             'status': '2',
             "message": 'Sign In Success',
-            'cusid': ret["cusid"]
             }), 201)
     else:
         response = make_response('could not verify',  401, {'Authentication': '"login required"'})
@@ -119,12 +142,73 @@ def signUp():
         # )
         # db.session.add(user)
         # db.session.commit()
-        agentManager.addUser(email, password, name, role)
+        domain = email.split('@')[1]
+        company = agentManager.get_company_by_domain(domain)
+        if company == None:
+            return {
+                "message": "Your company is not registered. Contact support.",
+                "is_success": False
+            }
+        agentManager.addUser(email, password, name, role, company["id"])
         user = agentManager.getUserByEmail(email)
-        return make_response('Successfully registered.', 201)
+        return user
     else:
         # returns 202 if user already exists
         return make_response('User already exists. Please Log in.', 202)
+
+#register domain and its company
+@app.route('/api/domain', methods=['POST'])
+@token_required
+@cross_origin(supports_credentials=True)
+def register_domain(current_user):
+    if current_user["role"] != 1 and current_user["role"] != "1":
+        response = {
+            "message": "You have not an admin privilege.",
+            "status": False
+        }
+        return response
+    data = request.get_json()
+    name = data["name"]
+    domain = data["domain"]
+    company = agentManager.register_domain(name, domain)
+    if company == None:
+        response = {
+            "message": "Register new domain failed.",
+            "status": False
+        }
+        return response
+    else:
+        return company
+    
+#get company from domain
+@app.route('/api/domain', methods=['GET'])
+@token_required
+@cross_origin(supports_credentials=True)
+def get_company_by_domain(current_user):
+    if current_user["role"] != 1 and current_user["role"] != "1":
+        response = {
+            "message": "You have not an admin privilege.",
+            "status": False
+        }
+        return response
+    data = request.get_json()
+    domain = data["domain"]
+    company = agentManager.get_company_by_domain(domain)
+    return company      # can be None
+
+#get company from domain
+@app.route('/api/domains', methods=['GET'])
+@token_required
+@cross_origin(supports_credentials=True)
+def get_all_domains(current_user):
+    if current_user["role"] != 1 and current_user["role"] != "1":
+        response = {
+            "message": "You have not an admin privilege.",
+            "is_success": False
+        }
+        return response
+    companies = agentManager.get_all_companies()
+    return companies
 
 #get users with a admin role
 @app.route('/api/users', methods=['GET'])
@@ -134,10 +218,11 @@ def getUsers(current_user):
     if current_user["role"] != 1 and current_user["role"] != "1":
         response = {
             "message": "You have not an admin privilege.",
-            "status": False
+            "is_success": False
         }
         return response
-    users = agentManager.getUsers()
+    company_id = request.args.get('id')
+    users = agentManager.getUsersByDomainRid(company_id)
     return users
 
 #edit user with a admin role
@@ -148,19 +233,20 @@ def editUser(current_user):
     if current_user["role"] != 1 and current_user["role"] != "1":
         response = {
             "message": "You have not an admin privilege.",
-            "status": False
+            "is_success": False
         }
         return response
     data = request.get_json()
     name = data["name"]
     userrid = data["id"]
+    companyrid = data["did"]
     ret = agentManager.editUserByID(userrid, name)
     if ret == False:
         return {
             "message": "Edit user failed.",
-            "status": False
+            "is_success": False
         }
-    users = agentManager.getUsers()
+    users = agentManager.getUsersByDomainRid(companyrid)
     return users
     
 # After successful log in, returns activation keys
@@ -169,9 +255,8 @@ def editUser(current_user):
 @token_required
 @cross_origin(supports_credentials=True)
 def get_act_keys(current_user):
-    print(current_user)
-    user_rowid = current_user["id"]
-    ret = agentManager.getActkeysByUserRowId(user_rowid)
+    user_cusid = current_user["cusid"]
+    ret = agentManager.getActkeysByCusId(user_cusid)
     print(ret)
     return ret
 
@@ -180,7 +265,6 @@ def get_act_keys(current_user):
 @token_required
 @cross_origin(supports_credentials=True)
 def get_act_key_by_id(current_user):
-    print(current_user)
     actkey_rid = request.args.get('id')
     ret = agentManager.getActkeyByRowId(actkey_rid)
     print(ret)
@@ -200,10 +284,10 @@ def editActkey(current_user):
     if ret == False:
         return {
             "message": "Edit Activation Key failed.",
-            "status": False
+            "is_success": False
         }
-    user_rowid = current_user["id"]
-    actkeys = agentManager.getActkeysByUserRowId(user_rowid)
+    cusid = current_user["cusid"]
+    actkeys = agentManager.getActkeysByCusId(cusid)
     return actkeys
 
 # By Row ID, get the Activation Key(actkey)
@@ -211,11 +295,11 @@ def editActkey(current_user):
 @token_required
 @cross_origin(supports_credentials=True)
 def get_guide(current_user):
-    print(current_user)
     actkey_rid = request.args.get('id')
     ret = agentManager.getActkeyByRowId(actkey_rid)
     response = {
         "cusid": current_user["cusid"],
+        "customerid": current_user["customerid"],
         "actkey": ret["actkey"]
     }
     print(response)
@@ -227,10 +311,11 @@ def get_guide(current_user):
 def create_act_key(current_user):
     # data = request.form
     # title = data.get('title')
+    cusid = current_user["cusid"]
     data = request.get_json()
     title = data["title"]
-    agentManager.addNewActkey(current_user["id"], title)
-    ret = agentManager.getActkeysByUserRowId(current_user["id"])
+    agentManager.addNewActkey(current_user["id"], title, cusid)
+    ret = agentManager.getActkeysByCusId(cusid)
     return ret
     
 # API to check activation with activation key and customer id
