@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import API from "../../api/api";
 import { useNavigate } from 'react-router';
 
-import { HiOutlinePencilAlt, HiDocumentSearch, HiOutlineX, HiCheck, HiUsers } from 'react-icons/hi'
+import { HiOutlinePencilAlt, HiDocumentSearch, HiOutlineX, HiCheck, HiUsers, HiKey } from 'react-icons/hi'
 import { useDispatch, useSelector } from 'react-redux';
 import { logOutUser } from '../../redux/actions/authActions';
 
@@ -12,6 +12,11 @@ const DomainsPage = () => {
     const [tableData, setTableData] = useState([]);
     const [editRow, setEditRow] = useState(-1);
     const [tName, setTName] = useState('');
+    
+    const [pDName, setPDName] = useState('');
+    const [pDomain, setPDomain] = useState('');
+    const [pCustomerid, setPCustomerid] = useState('');
+    const [pending, setPending] = useState(false);
     const navigate = useNavigate();
     const cusid = useSelector(state => state.authReducer.user.cusid);
     const userRole = useSelector(state => state.authReducer.user.role)
@@ -45,6 +50,22 @@ const DomainsPage = () => {
         navigate(`dusers/${cusid}`)
     }
 
+    const handleAddItem = () => {
+        console.log('adding item...')
+        setPending(false);
+        API.addDomain({
+            name: pDName,
+            domain: pDomain,
+            customerid: pCustomerid
+        })
+            .then((res) => { 
+                setTableData(res.data);
+            })
+            .catch((err) => {
+                console.log(err);
+            })   
+    }
+
     useEffect(() => {
         console.log(userRole);
         if(userRole == 0)
@@ -63,7 +84,7 @@ const DomainsPage = () => {
     return (
         <>
             <div className='m-32'>
-                <div className='grid grid-cols-3 gap-4 p-2'>
+                <div className='grid grid-cols-2 gap-4 p-2'>
                     <div className='text-white text-2xl'>Domain List</div>
                     <div className='text-white justify-self-end'>
                         <button 
@@ -74,6 +95,13 @@ const DomainsPage = () => {
                              }}
                         >
                                 Sign Out
+                        </button>
+                        <button 
+                            type="button" 
+                            className="text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 shadow-lg shadow-blue-500/50 dark:shadow-lg dark:shadow-blue-800/80 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2"
+                            onClick={() => setPending(true)}
+                        >
+                            New Domain
                         </button>
                     </div>
                 </div>
@@ -135,7 +163,7 @@ const DomainsPage = () => {
                                                         className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
                                                         onClick={() => handleRowClicked(one.id, one.domain + one.customerid)}
                                                     >
-                                                        <HiDocumentSearch></HiDocumentSearch>
+                                                        <HiKey></HiKey>
                                                     </button>
                                                     <button 
                                                         type="button" 

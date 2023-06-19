@@ -43,5 +43,8 @@ export default {
     },
     getDomains: function() {
         return axios.get(`/api/domains`);
+    },
+    addDomain: function(new_domain) {
+        return axios.post(`/api/domain`, new_domain)
     }
 }
