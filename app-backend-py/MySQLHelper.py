@@ -309,7 +309,8 @@ class AgentManage():
         except Exception as ee:
             print(ee)
             return False
-                
+
+    # checked
     def isActivated(self, customerid, actkey):
         query = f"SELECT tbl_companies.*, tbl_actkeys.actkey FROM tbl_companies LEFT JOIN tbl_actkeys " + \
             f"ON tbl_actkeys.cusid = tbl_companies.id WHERE tbl_companies.customerid = '{customerid}' " + \
@@ -319,7 +320,7 @@ class AgentManage():
         if ds != None and len(ds) > 0:
             return "2"
         else:
-            query = f"SELECT tbl_companies.*, tbl_actkeys.actkey FROM tbl_users LEFT JOIN tbl_actkeys " + \
+            query = f"SELECT tbl_companies.*, tbl_actkeys.actkey FROM tbl_companies LEFT JOIN tbl_actkeys " + \
                 f"ON tbl_actkeys.cusid = tbl_companies.id WHERE tbl_companies.customerid = '{customerid}' " + \
                 f"AND tbl_actkeys.actkey != '{actkey}';"
             self.my_cursor.execute(query)

@@ -375,14 +375,16 @@ def create_act_key(current_user):
     agentManager.addNewActkey(current_user["id"], title, cusid)
     ret = agentManager.getActkeysByCusId(cusid)
     return ret
-    
+
+# checked
 # API to check activation with activation key and customer id
 @app.route('/api/activate', methods=['POST'])
+@cross_origin(supports_credentials=True)
 def activate():
     data = request.get_json()
-    cusid = data["cusid"]
+    customerid = data["customerid"]
     actkey = data["actkey"]
-    ret = agentManager.isActivated(cusid, actkey)
+    ret = agentManager.isActivated(customerid, actkey)
     print(ret)
     return ret
 
