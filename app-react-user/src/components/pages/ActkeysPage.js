@@ -5,9 +5,9 @@ import { useParams, useNavigate } from 'react-router';
 
 import { HiCheck, HiOutlineX, HiDocumentSearch, HiArrowRight, HiRefresh } from 'react-icons/hi'
 import { useDispatch, useSelector } from 'react-redux';
-import { logOutUser } from '../../redux/actions/authActions';
+import { logOutUser, setCurrentUserActKeyInfo } from '../../redux/actions/authActions';
 
-const IndexPage = () => {
+const ActkeysPage = () => {
     const [tableData, setTableData] = useState([]);
     const [pending, setPending] = useState(false);
     const navigate = useNavigate();
@@ -41,7 +41,8 @@ const IndexPage = () => {
             .then(res => setTableData(res.data))
     }
 
-    const handleRowClicked = (id) => {
+    const handleRowClicked = (id, actkey) => {
+        dispatch(setCurrentUserActKeyInfo(actkey));
         navigate(`/detail/${id}`);
     }
 
@@ -151,7 +152,7 @@ const IndexPage = () => {
                                             <button 
                                                 type="button" 
                                                 className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-                                                onClick={() => handleRowClicked(one.id)}
+                                                onClick={() => handleRowClicked(one.id, one.actkey)}
                                             >
                                                 <HiArrowRight/>
                                             </button>
@@ -222,4 +223,4 @@ const IndexPage = () => {
     )
 }
 
-export default IndexPage;
+export default ActkeysPage;

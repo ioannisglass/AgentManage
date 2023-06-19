@@ -2,14 +2,19 @@ import React, { useEffect, useState } from 'react';
 
 import API from "../../api/api";
 import { useParams, useNavigate } from 'react-router';
+import { useDispatch, useSelector } from 'react-redux';
+import { setCurrentUserDeviceInfo } from '../../redux/actions/authActions';
 
 const DetailPage = () => {
     
     const [tableData, setTableData] = useState([]);
     const { id } = useParams();
     const navigate = useNavigate();
+    const dispatch = useDispatch();
+    const actkey = useSelector(state => state.authReducer.actkey)
 
-    const handleRowClicked = (id) => {
+    const handleRowClicked = (id, info) => {
+        dispatch(setCurrentUserDeviceInfo(info))
         navigate(`/device/${id}`);
     }
 
@@ -27,7 +32,7 @@ const DetailPage = () => {
         <>
             <div className='m-32'>
                 <div className='grid grid-cols-2 gap-4 p-2'>
-                    <div className='text-white text-2xl'>Detail {id}</div>
+                    <div className='text-white text-2xl'>{actkey}</div>
                     <div className='text-white justify-self-end'>
                         <button 
                             type="button" 
@@ -94,7 +99,7 @@ const DetailPage = () => {
                                             <button 
                                                 type="button" 
                                                 className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-                                                onClick={() => handleRowClicked(one.id)}
+                                                onClick={() => handleRowClicked(one.id, one.com_name)}
                                             >
                                                 <svg aria-hidden="true" className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd"></path></svg>
                                                 <span className="sr-only">Icon description</span>

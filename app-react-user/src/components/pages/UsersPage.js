@@ -1,17 +1,18 @@
 import React, { useEffect, useState } from 'react';
 
 import API from "../../api/api";
-import { useNavigate } from 'react-router';
+import { useParams, useNavigate } from 'react-router';
 
 import { HiOutlinePencilAlt, HiDocumentSearch, HiOutlineX, HiCheck } from 'react-icons/hi'
 import { useDispatch, useSelector } from 'react-redux';
 import { logOutUser } from '../../redux/actions/authActions';
 
-const HomePage = () => {
+const UsersPage = () => {
     
     const [tableData, setTableData] = useState([]);
     const [editRow, setEditRow] = useState(-1);
     const [tName, setTName] = useState('');
+    const { id } = useParams();                     // selected row id of Domain table
     const navigate = useNavigate();
     const cusid = useSelector(state => state.authReducer.user.cusid);
     const userRole = useSelector(state => state.authReducer.user.role)
@@ -43,18 +44,14 @@ const HomePage = () => {
     }
 
     useEffect(() => {
-        console.log(userRole);
-        if(userRole == 0)
-            navigate(`dash/${userId}`)
-        else {
-            API.getUserList()
-                .then((res) => { 
-                    setTableData(res.data);
-                })
-                .catch((err) => {
-                    console.log(err);
-                })
-        }
+        console.log(id);
+        API.getUserList(id)
+        .then((res) => { 
+            setTableData(res.data);
+        })
+        .catch((err) => {
+            console.log(err);
+        })
     }, [])
 
     return (
@@ -62,9 +59,9 @@ const HomePage = () => {
             <div className='m-32'>
                 <div className='grid grid-cols-3 gap-4 p-2'>
                     <div className='text-white text-2xl'>User List</div>
-                    <div className='text-white text-2xl'>
-                        Customer ID: { cusid }
-                    </div>
+                    {/* <div className='text-white text-2xl'> */}
+                        {/* Customer ID: { customer_info } */}
+                    {/* </div> */}
                     <div className='text-white justify-self-end'>
                         <button 
                             type="button" 
@@ -162,4 +159,4 @@ const HomePage = () => {
     )
 }
 
-export default HomePage;
+export default UsersPage;

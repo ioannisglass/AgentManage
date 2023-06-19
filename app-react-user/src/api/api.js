@@ -4,13 +4,13 @@ axios.defaults.baseURL = 'http://192.168.8.171:5000';
 
 export default {
     registerUser: function (userData) {
-        return axios.post("/api/user/register", userData);
+        return axios.post("/api/auth/signup", userData);
     },
     loginUser: function (userData) {
         return axios.post("/api/auth/signin", userData);
     },
-    getUserList: function () {
-        return axios.get(`/api/users`);
+    getUserList: function (cusid) {
+        return axios.get(`/api/users?id=${cusid}`);
     },
     updateUserData: function(data) {
         return axios.put(`/api/user`, data);
@@ -40,5 +40,8 @@ export default {
     },
     getGuideData: function (id) {
         return axios.get(`/api/guide?id=${id}`);
+    },
+    getDomains: function() {
+        return axios.get(`/api/domains`);
     }
 }

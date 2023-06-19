@@ -2,12 +2,15 @@ import React, { useEffect, useState } from 'react';
 
 import API from "../../api/api";
 import { useParams, useNavigate } from 'react-router';
+import { useDispatch, useSelector } from 'react-redux';
 
 const DevicePage = () => {
     
     const [tableData, setTableData] = useState([]);
     const { id } = useParams();
     const navigate = useNavigate();
+    const actkey = useSelector(state => state.authReducer.actkey)
+    const device = useSelector(state => state.authReducer.device)
 
     useEffect(() => {
         API.getDeviceData(id)
@@ -22,8 +25,9 @@ const DevicePage = () => {
     return (
         <>
             <div className='m-32'>
-                <div className='grid grid-cols-2 gap-4 p-2'>
-                    <div className='text-white text-2xl'>Device {id}</div>
+                <div className='grid grid-cols-3 gap-4 p-2'>
+                    <div className='text-white text-2xl'>{actkey}</div>
+                    <div className='text-white text-2xl'>{device}</div>
                     <div className='text-white justify-self-end'>
                         <button 
                             type="button" 

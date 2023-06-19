@@ -3,11 +3,11 @@ import React, { useEffect, useState } from 'react';
 import API from "../../api/api";
 import { useNavigate } from 'react-router';
 
-import { HiOutlinePencilAlt, HiDocumentSearch, HiOutlineX, HiCheck } from 'react-icons/hi'
+import { HiOutlinePencilAlt, HiDocumentSearch, HiOutlineX, HiCheck, HiUsers } from 'react-icons/hi'
 import { useDispatch, useSelector } from 'react-redux';
 import { logOutUser } from '../../redux/actions/authActions';
 
-const HomePage = () => {
+const DomainsPage = () => {
     
     const [tableData, setTableData] = useState([]);
     const [editRow, setEditRow] = useState(-1);
@@ -19,20 +19,19 @@ const HomePage = () => {
     const dispatch = useDispatch();
 
     const handleRowClicked = async (id, actkey) => {
-
         navigate(`/dash/${id}`);
     }
 
-    const handleUserEdit = (index) => {
+    const handleDomainEdit = (index) => {
         setEditRow(index);
         setTName(tableData[index].name);
     }
 
-    const handleUserEditCancled = () => {
+    const handleDomainEditCancled = () => {
         setEditRow(-1);
     }
 
-    const handleUserEditFinished = () => {
+    const handleDomainEditFinished = () => {
         API.updateUserData({
             name: tName,
             id: tableData[editRow].id
@@ -42,12 +41,16 @@ const HomePage = () => {
         setEditRow(-1);
     }
 
+    const handleUsersViewClicked = () => {
+        navigate(`dusers/${cusid}`)
+    }
+
     useEffect(() => {
         console.log(userRole);
         if(userRole == 0)
             navigate(`dash/${userId}`)
         else {
-            API.getUserList()
+            API.getDomains()
                 .then((res) => { 
                     setTableData(res.data);
                 })
@@ -61,10 +64,7 @@ const HomePage = () => {
         <>
             <div className='m-32'>
                 <div className='grid grid-cols-3 gap-4 p-2'>
-                    <div className='text-white text-2xl'>User List</div>
-                    <div className='text-white text-2xl'>
-                        Customer ID: { cusid }
-                    </div>
+                    <div className='text-white text-2xl'>Domain List</div>
                     <div className='text-white justify-self-end'>
                         <button 
                             type="button" 
@@ -85,10 +85,13 @@ const HomePage = () => {
                                     Name
                                 </th>
                                 <th scope="col" className="px-6 py-3">
-                                    Email
+                                    Domain
                                 </th>
                                 <th scope="col" className="px-6 py-3">
-                                    
+                                    Customer ID
+                                </th>
+                                <th scope="col" className="px-6 py-3">
+
                                 </th>
                             </tr>
                         </thead>
@@ -96,7 +99,7 @@ const HomePage = () => {
                             {
                                 tableData.map((one, _i) => 
                                     <tr className="bg-white border-t dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600" key={_i}>
-                                        <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                        <th scope="row" className="px-6 py-3 font-medium text-gray-900 whitespace-nowrap dark:text-white">
                                             { 
                                                 _i === editRow ?
                                                 <input 
@@ -110,26 +113,36 @@ const HomePage = () => {
                                                 one.name 
                                             }
                                         </th>
-                                        <td className="px-6 py-4">
-                                            { one.email }
+                                        <td className="px-6 py-3">
+                                            { one.domain }
                                         </td>
-                                        <td className="px-6 py-4 text-right">
+                                        <td className="px-6 py-3">
+                                            { one.customerid }
+                                        </td>
+                                        <td className="px-6 py-3 text-right">
                                             { 
                                                 _i !== editRow ?
                                                 <>
                                                     <button 
                                                         type="button" 
                                                         className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-                                                        onClick={() => handleUserEdit(_i)}
+                                                        onClick={() => handleDomainEdit(_i)}
                                                     >
                                                         <HiOutlinePencilAlt></HiOutlinePencilAlt>
                                                     </button>
                                                     <button 
                                                         type="button" 
                                                         className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-                                                        onClick={() => handleRowClicked(one.id, one.actkey)}
+                                                        onClick={() => handleRowClicked(one.id, one.domain + one.customerid)}
                                                     >
                                                         <HiDocumentSearch></HiDocumentSearch>
+                                                    </button>
+                                                    <button 
+                                                        type="button" 
+                                                        className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                                                        onClick={() => handleUsersViewClicked(one.id)}
+                                                    >
+                                                        <HiUsers/>
                                                     </button>
                                                 </>
                                                     :
@@ -137,14 +150,14 @@ const HomePage = () => {
                                                     <button 
                                                         type="button" 
                                                         className="text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center mr-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800"
-                                                        onClick={() => handleUserEditCancled()}
+                                                        onClick={() => handleDomainEditCancled()}
                                                     >
                                                         <HiOutlineX/>
                                                     </button>
                                                     <button 
                                                         type="button" 
                                                         className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-                                                        onClick={() => handleUserEditFinished()}
+                                                        onClick={() => handleDomainEditFinished()}
                                                     >
                                                         <HiCheck/>
                                                     </button>
@@ -162,4 +175,4 @@ const HomePage = () => {
     )
 }
 
-export default HomePage;
+export default DomainsPage;
