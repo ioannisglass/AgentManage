@@ -65,8 +65,8 @@ const DomainsPage = () => {
         setEditRow(-1);
     }
 
-    const handleUsersViewClicked = () => {
-        navigate(`dusers/${cusid}`)
+    const handleUsersViewClicked = (row_cusid) => {
+        navigate(`dusers/${row_cusid}`)
     }
 
     const handleAddItem = () => {
