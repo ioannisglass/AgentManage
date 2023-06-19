@@ -82,6 +82,7 @@ def greet():
     name = request.args.get('name', 'Guest')
     return f'Hello, {name}!'
 
+# checked
 # API to login with credentials and to get customer id and activation key
 @app.route('/api/auth/signin', methods=['POST'])
 @cross_origin(supports_credentials=True)
@@ -156,6 +157,7 @@ def signUp():
         # returns 202 if user already exists
         return make_response('User already exists. Please Log in.', 202)
 
+# checked
 #register domain and its company
 @app.route('/api/domain', methods=['POST'])
 @token_required
@@ -170,15 +172,49 @@ def register_domain(current_user):
     data = request.get_json()
     name = data["name"]
     domain = data["domain"]
-    company = agentManager.register_domain(name, domain)
-    if company == None:
+    customerid = data["customerid"]
+    company = agentManager.register_domain(name, domain, customerid)
+    companies = agentManager.get_all_companies()
+    if company["is_success"] == False:
+        return {
+            "is_success": False,
+            "message": "Register failed.",
+            "domains": companies  
+        }
+    else:
+        return {
+            "is_success": True,
+            "message": "Registered successfully.",
+            "domains": companies
+        }
+
+# checked
+#register domain and its company
+@app.route('/api/domain', methods=['PUT'])
+@token_required
+@cross_origin(supports_credentials=True)
+def update_domain(current_user):
+    if current_user["role"] != 1 and current_user["role"] != "1":
         response = {
-            "message": "Register new domain failed.",
+            "message": "You have not an admin privilege.",
             "status": False
         }
         return response
+    data = request.get_json()
+    id = data["id"]
+    name = data["name"]
+    domain = data["domain"]
+    customerid = data["customerid"]
+    ret = agentManager.update_domain(id, name, domain, customerid)
+    if ret == False:
+        response = {
+            "message": "Update domain failed.",
+            "is_success": False
+        }
+        return response
     else:
-        return company
+        companies = agentManager.get_all_companies()
+        return companies
     
 #get company from domain
 @app.route('/api/domain', methods=['GET'])
@@ -196,6 +232,7 @@ def get_company_by_domain(current_user):
     company = agentManager.get_company_by_domain(domain)
     return company      # can be None
 
+# checked
 #get company from domain
 @app.route('/api/domains', methods=['GET'])
 @token_required
@@ -210,10 +247,11 @@ def get_all_domains(current_user):
     companies = agentManager.get_all_companies()
     return companies
 
+# checked
 #get users with a admin role
 @app.route('/api/users', methods=['GET'])
 @token_required
-@cross_origin(supports_credentials=True)
+# @cross_origin(supports_credentials=True)
 def getUsers(current_user):
     if current_user["role"] != 1 and current_user["role"] != "1":
         response = {

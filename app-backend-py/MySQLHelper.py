@@ -75,10 +75,11 @@ class AgentManage():
             f"VALUES ('{email}', '{password}', {company_id}, '{action_at}', '{action_at}', '{name}', {role});"
         self.my_cursor.execute(query)
         self.my_db.commit()
-        
+
+    # checked
     # register company and its domain
-    def register_domain(self, name, domain):
-        sel_query = f"SELECT * FROM tbl_companies WHERE `name` = '{name}' OR `domain` = '{domain}';"
+    def register_domain(self, name, domain, customerid):
+        sel_query = f"SELECT * FROM tbl_companies WHERE `name` = '{name}' OR `domain` = '{domain}' OR `customerid` = '{customerid}';"
         self.my_cursor.execute(sel_query)
         ds = self.my_cursor.fetchall()
         action_at = datetime.now().strftime("%m/%d/%Y %H:%M:%S")
@@ -90,13 +91,11 @@ class AgentManage():
                 "customerid": ds[0][3],
                 "created_at": ds[0][4],
                 "updated_at": ds[0][5],
+                "is_success": False
             }
         else:
-            new_customerid = self.generate_customer_id()
-            if new_customerid == '':
-                return None
-            query = f"INSERT INTO tbl_companies (`name`, `domain`, `cusid`, `created_at`, `updated_at`) " + \
-                f"VALUES ('{name}', '{domain}', '{new_customerid}', '{action_at}', '{action_at}');"
+            query = f"INSERT INTO tbl_companies (`name`, `domain`, `customerid`, `created_at`, `updated_at`) " + \
+                f"VALUES ('{name}', '{domain}', '{customerid}', '{action_at}', '{action_at}');"
             self.my_cursor.execute(query)
             self.my_db.commit()
             
@@ -109,8 +108,24 @@ class AgentManage():
                 "customerid": ds[0][3],
                 "created_at": ds[0][4],
                 "updated_at": ds[0][5],
+                "is_success": True
             }
             
+    # checked
+    # update domain
+    def update_domain(self, id, name, domain, customerid):
+        try:
+            action_at = datetime.now().strftime("%m/%d/%Y %H:%M:%S")
+            update_query = f"UPDATE `tbl_companies` SET `name` = '{name}', `domain` = '{domain}', " +\
+                f"`customerid` = '{customerid}', `updated_at` = '{action_at}' " + \
+                f"WHERE `id` = {id};"
+            self.my_cursor.execute(update_query)
+            self.my_db.commit()
+            return True
+        except Exception as ee:
+            print(ee)
+            return False
+    
     # get company from domain
     def get_company_by_domain(self, domain):
         sel_query = f"SELECT * FROM tbl_companies WHERE `domain` = '{domain}';"
@@ -128,6 +143,7 @@ class AgentManage():
         else:
             return None
         
+    # checked
     # get all domains
     def get_all_companies(self):
         sel_query = f"SELECT * FROM tbl_companies;"
@@ -144,8 +160,7 @@ class AgentManage():
                     "created_at": row[4],
                     "updated_at": row[5],
                 })
-        else:
-            return None
+        return ret
     
     # generate unique customer id
     def generate_customer_id(self):
@@ -178,10 +193,12 @@ class AgentManage():
         except Exception as ee:
             print(ee)
             return False
-        
+    
+    # checked
     # get All users by company id
     def getUsersByDomainRid(self, company_id):
-        query = f"SELECT * FROM tbl_users WHERE `role` = 0 AND `cusid` = {company_id};"
+        # query = f"SELECT * FROM tbl_users WHERE `role` = 0 AND `cusid` = {company_id};"
+        query = f"SELECT * FROM tbl_users WHERE `cusid` = {company_id};"
         self.my_cursor.execute(query)
         ds = self.my_cursor.fetchall()
         ret = []
@@ -198,11 +215,13 @@ class AgentManage():
                     "role": row[7]
                 })
         return ret
-        
+    
+    # checked
     def signIn(self, email, password):
         query = f"SELECT tbl_users.id, tbl_users.cusid, tbl_users.role, " +\
             f"tbl_companies.name, tbl_companies.customerid FROM tbl_users " +\
-            f"ON tbl_companies.cusid = tbl_users.cusid " +\
+            f"LEFT JOIN tbl_companies " +\
+            f"ON tbl_companies.id = tbl_users.cusid " +\
             f"WHERE tbl_users.email = '{email}' AND tbl_users.password = '{password}';"
         self.my_cursor.execute(query)
         ds = self.my_cursor.fetchall()
