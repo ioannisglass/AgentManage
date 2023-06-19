@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import API from "../../api/api";
 import { useParams, useNavigate } from 'react-router';
 
-import { HiCheck, HiOutlineX, HiDocumentSearch, HiArrowRight, HiRefresh } from 'react-icons/hi'
+import { HiCheck, HiOutlineX, HiDocumentSearch, HiArrowRight, HiRefresh, HiTrash } from 'react-icons/hi'
 import { useDispatch, useSelector } from 'react-redux';
 import { logOutUser, setCurrentUserActKeyInfo } from '../../redux/actions/authActions';
 
@@ -34,11 +34,16 @@ const ActkeysPage = () => {
     }, [])
 
     const handleRefresh = (index) => {
-        API.updateStatus({
+        API.updateActkeyStatus({
             id: tableData[index].id,
-            status : tableData[index].status === 2 ? 0 : tableData[index].status + 1
+            status : tableData[index].status === 2 ? 1 : 2
         })
             .then(res => setTableData(res.data))
+    }
+
+    const handleDelete = (index) => {
+        API.deleteActkey(tableData[index].id)
+        .then(res => setTableData(res.data))
     }
 
     const handleNewActkeyClicked = () => {
@@ -146,6 +151,13 @@ const ActkeysPage = () => {
                                                 onClick={() => handleRefresh(_i)}
                                             >
                                                 <HiRefresh/>
+                                            </button>
+                                            <button 
+                                                type="button" 
+                                                className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                                                onClick={() => handleDelete(_i)}
+                                            >
+                                                <HiTrash/>
                                             </button>
                                             <button 
                                                 type="button" 

@@ -26,7 +26,7 @@ const DomainsPage = () => {
     const dispatch = useDispatch();
 
     const handleRowClicked = async (id, actkey) => {
-        navigate(`/dash/${id}`);
+        navigate(`/dactkeys/${id}`);
     }
 
     const handleDomainEdit = (index) => {

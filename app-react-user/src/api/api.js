@@ -15,8 +15,11 @@ export default {
     updateUserData: function(data) {
         return axios.put(`/api/user`, data);
     },
-    updateStatus: function(data) {
+    updateActkeyStatus: function(data) {
         return axios.put(`/api/actkey`, data);
+    },
+    deleteActkey: function(id) {
+        return axios.delete(`/api/actkey?id=${id}`)
     },
     getActkeys: function (cusid) {
         return axios.get(`/api/actkeys?id=${cusid}`);

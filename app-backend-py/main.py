@@ -308,6 +308,7 @@ def get_act_key_by_id(current_user):
     print(ret)
     return ret
 
+# checked
 # By Row ID, change the status of Activation Key
 @app.route('/api/actkey', methods=['PUT'])
 @token_required
@@ -319,6 +320,24 @@ def editActkey(current_user):
     actkey_rid = data["id"]
 
     ret = agentManager.editActkeyStatus(actkey_rid, status)
+    if ret == False:
+        return {
+            "message": "Edit Activation Key failed.",
+            "is_success": False
+        }
+    cusid = current_user["cusid"]
+    actkeys = agentManager.getActkeysByCusId(cusid)
+    return actkeys
+
+# checked
+# By Row ID, delete Activation Key(Set the status 0)
+@app.route('/api/actkey', methods=['DELETE'])
+@token_required
+@cross_origin(supports_credentials=True)
+def deleteActkey(current_user):
+    actkey_rid = request.args.get('id')
+
+    ret = agentManager.editActkeyStatus(actkey_rid, 0)
     if ret == False:
         return {
             "message": "Edit Activation Key failed.",
