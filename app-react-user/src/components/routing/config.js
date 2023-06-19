@@ -23,7 +23,6 @@ const PrivateRoute = [
     { path: "/", element: <DomainsPage/> },
     { path: "/dusers/:id", element: <UsersPage/> },
     { path: "/dactkeys/:id", element: <ActkeysPage/> },
-    { path: "/dash/:id", element: <ActkeysPage/> },
     { path: "/detail/:id", element: <DetailPage/> },
     { path: "/device/:id", element: <DevicePage/> },
     { path: "/allapp/:id", element: <AllAppPage/> }

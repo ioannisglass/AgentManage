@@ -17,14 +17,14 @@ const ActkeysPage = () => {
     const [pActKey, setActKey] = useState('');
     const [pAgents, setAgents] = useState(0);
     const [pDate, setDate] = useState('');
-    const [pTitle, setTitle] = useState('');
+    const [pTitle, setPTitle] = useState('');
     const [pStatus, setStatus] = useState(2);
 
-    const cusid = useSelector(state => state.authReducer.user.cusid);
+    const customerid = useSelector(state => state.authReducer.user.customerid);
     
     useEffect(() => {
         console.log(id);
-        API.getTableData(id)
+        API.getActkeys(id)
             .then((res) => { 
                 setTableData(res.data);
              })
@@ -39,6 +39,11 @@ const ActkeysPage = () => {
             status : tableData[index].status === 2 ? 0 : tableData[index].status + 1
         })
             .then(res => setTableData(res.data))
+    }
+
+    const handleNewActkeyClicked = () => {
+        setPending(true);
+        setPTitle("");
     }
 
     const handleRowClicked = (id, actkey) => {
@@ -69,7 +74,7 @@ const ActkeysPage = () => {
             <div className='m-32'>
                 <div className='grid grid-cols-3 gap-4 p-2'>
                     <div className='text-white text-2xl'>Activation Keys</div>
-                    <div className='text-white text-2xl'>Customer ID: {cusid}</div>
+                    <div className='text-white text-2xl'>Customer ID: {customerid}</div>
                     <div className='text-white justify-self-end'>
                         <button 
                             type="button" 
@@ -83,9 +88,9 @@ const ActkeysPage = () => {
                         <button 
                             type="button" 
                             className="text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 shadow-lg shadow-blue-500/50 dark:shadow-lg dark:shadow-blue-800/80 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2"
-                            onClick={() => setPending(true)}
+                            onClick={() => handleNewActkeyClicked()}
                         >
-                                New Activation
+                            New Activation
                         </button>
                     </div>
                 </div>
@@ -181,7 +186,7 @@ const ActkeysPage = () => {
                                                 type="text" 
                                                 className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                                                 value={pTitle}
-                                                onChange={(e) => setTitle(e.target.value)}
+                                                onChange={(e) => setPTitle(e.target.value)}
                                                 required 
                                             />
                                         </div>

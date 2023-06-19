@@ -39,6 +39,10 @@ const RegisterPage = () => {
                     {
                         setShowToastr(true);
                         setToastrMsg(res.data.message);
+                    } else {
+                        setShowToastr(true);
+                        setToastrMsg("Successfully registered.");
+                        navigate('/auth/login');
                     }
                 })
                 .catch(err => { 

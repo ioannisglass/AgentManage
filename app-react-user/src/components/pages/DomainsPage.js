@@ -94,9 +94,9 @@ const DomainsPage = () => {
     }
 
     useEffect(() => {
-        console.log(`Role: ${userRole}`);
+        console.log(`cusid: ${cusid}, role: ${userRole}`)
         if(userRole == 0)
-            navigate(`dash/${userId}`)
+            navigate(`dactkeys/${cusid}`)
         else {
             API.getDomains()
                 .then((res) => { 

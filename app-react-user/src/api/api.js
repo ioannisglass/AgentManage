@@ -18,8 +18,8 @@ export default {
     updateStatus: function(data) {
         return axios.put(`/api/actkey`, data);
     },
-    getTableData: function (id) {
-        return axios.get(`/api/actkeys?id=${id}`);
+    getActkeys: function (cusid) {
+        return axios.get(`/api/actkeys?id=${cusid}`);
     },
     addActKeyData: function (val) {
         return axios.post('/api/newactkey', val)
