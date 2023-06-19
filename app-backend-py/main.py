@@ -286,15 +286,16 @@ def editUser(current_user):
         }
     users = agentManager.getUsersByDomainRid(companyrid)
     return users
-    
+
+# checked
 # After successful log in, returns activation keys
 # param id means the user row id
 @app.route('/api/actkeys', methods=['GET'])
 @token_required
 @cross_origin(supports_credentials=True)
 def get_act_keys(current_user):
-    user_cusid = current_user["cusid"]
-    ret = agentManager.getActkeysByCusId(user_cusid)
+    cusid = request.args.get('id')
+    ret = agentManager.getActkeysByCusId(cusid)
     print(ret)
     return ret
 

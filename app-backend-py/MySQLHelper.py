@@ -242,9 +242,11 @@ class AgentManage():
             ret["status"] = "2"
             ret["message"] = "Sign In Success"
         return ret
-    
-    def getActkeysByCusId(self, cusrid):
-        query = f"SELECT tbl_actkeys.*, COUNT(tbl_agents.id) as actkeycount FROM tbl_actkeys LEFT JOIN tbl_agents ON tbl_actkeys.id = tbl_agents.actkeyid WHERE tbl_actkeys.cusid = {cusrid} GROUP BY tbl_actkeys.id;"
+
+    # checked
+    # get All Activation Keys by cusid
+    def getActkeysByCusId(self, cusid):
+        query = f"SELECT tbl_actkeys.*, COUNT(tbl_agents.id) as actkeycount FROM tbl_actkeys LEFT JOIN tbl_agents ON tbl_actkeys.id = tbl_agents.actkeyid WHERE tbl_actkeys.cusid = {cusid} GROUP BY tbl_actkeys.id;"
         self.my_cursor.execute(query)
         ds = self.my_cursor.fetchall()
         ret = []
