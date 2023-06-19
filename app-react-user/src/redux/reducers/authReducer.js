@@ -2,6 +2,11 @@ const isEmpty = require("is-empty");
 
 const authReducer = (state = {}, action) => {
   switch (action.type) {
+    case 'SET_NEWS':
+      return {
+        ... state,
+        news: action.payload
+      }
     case 'SET_CURRENT_USER':
       return {
         ...state,

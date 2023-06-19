@@ -14,6 +14,7 @@ function* loginUser(userData) {
                 return (decoded);
             })
             .catch(err => {
+                console.log(err.response.data)
                 throw err.response.data;
             });
         console.log(json)
@@ -23,6 +24,7 @@ function* loginUser(userData) {
         });
     }
     catch (error) {
+        // let errors = error + new Date().getTime().toString()
         yield put({
             type: 'SET_CURRENT_USER_FAILED',
             error

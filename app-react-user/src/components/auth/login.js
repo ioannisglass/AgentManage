@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { loginUser } from '../../redux/actions/authActions'
+import { loginUser,setCurrentUserMsgInfo } from '../../redux/actions/authActions'
 import { useNavigate } from 'react-router';
 import Toastr from "../util/toastr"
+// import { setCurrentUserMsgInfo } from "../../redux/actions/auth"
 
 const LoginPage = () => {
 
@@ -11,13 +12,28 @@ const LoginPage = () => {
     const [showToastr, setShowToastr] = useState(false);
     const [toastrMsg, setToastrMsg] = useState('');
     const isAuthenticated = useSelector((state) => state.authReducer.isAuthenticated);
+    const loginError = useSelector((state) => state.authReducer.loginError);
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
     useEffect(() => {
+        console.log(loginError)
         if (isAuthenticated)
             navigate('/');
-    }, [isAuthenticated])
+           
+        if (loginError) {
+            setToastrMsg(loginError)
+            setShowToastr(true);
+            dispatch(
+                setCurrentUserMsgInfo(null)
+            )
+        }
+    }, [isAuthenticated, loginError])
+
+    const handleToastrClose = () => {
+        setShowToastr(false);
+        console.log('something');
+    }
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -83,6 +99,8 @@ const LoginPage = () => {
                     </div>
                 </form>
             </div>
+            
+            <Toastr type='danger' text={toastrMsg} start={showToastr} handleClose={handleToastrClose}/>
         </div>
     )
 }
