@@ -40,7 +40,7 @@ const DetailPage = () => {
                             onClick={() => { 
                                 API.getGuideData(id)
                                     .then(res => {
-                                        navigate(`/documentation/${res.data.actkey}_${res.data.cusid}`)
+                                        navigate(`/documentation/${res.data.actkey}_${res.data.customerid}`)
                                     })
                                     .catch(err => {
 

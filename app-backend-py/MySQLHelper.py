@@ -260,23 +260,25 @@ class AgentManage():
                     "created_by": row[7]
                 })
         return ret
-    
+
+    # checked
+    # get Activation Key by Row ID
     def getActkeyByRowId(self, rowid):
-        query = f"SELECT tbl_actkeys.*, tbl_users.name FROM tbl_actkeys " +\
-            f"LEFT JOIN tbl_users ON tbl_users.id = tbl_actkeys.created_by WHERE tbl_actkeys.id = {rowid};"
+        query = f"SELECT tbl_actkeys.*, tbl_companies.customerid FROM tbl_actkeys " +\
+            f"LEFT JOIN tbl_companies ON tbl_companies.id = tbl_actkeys.cusid WHERE tbl_actkeys.id = {rowid};"
         self.my_cursor.execute(query)
         ds = self.my_cursor.fetchall()
-        ret = []
         if ds != None and len(ds) > 0:
             return {
                 "id": ds[0][0],
-                "userid": ds[0][1],
+                "cusid": ds[0][1],
                 "actkey": ds[0][2],
                 "status": ds[0][3],
                 "created_at": ds[0][4],
                 "updated_at": ds[0][5],
                 "title": ds[0][6],
-                "user": ds[0][7]
+                "created_by": ds[0][7],
+                "customerid": ds[0][8]
             }
         else:
             return None

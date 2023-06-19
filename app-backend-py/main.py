@@ -347,6 +347,7 @@ def deleteActkey(current_user):
     actkeys = agentManager.getActkeysByCusId(cusid)
     return actkeys
 
+# checked
 # By Row ID, get the Activation Key(actkey)
 @app.route('/api/guide', methods=['GET'])
 @token_required
@@ -355,8 +356,8 @@ def get_guide(current_user):
     actkey_rid = request.args.get('id')
     ret = agentManager.getActkeyByRowId(actkey_rid)
     response = {
-        "cusid": current_user["cusid"],
-        "customerid": current_user["customerid"],
+        "cusid": ret["cusid"],
+        "customerid": ret["customerid"],
         "actkey": ret["actkey"]
     }
     print(response)
