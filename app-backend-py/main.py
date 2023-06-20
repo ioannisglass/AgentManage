@@ -172,8 +172,7 @@ def register_domain(current_user):
     data = request.get_json()
     name = data["name"]
     domain = data["domain"]
-    customerid = data["customerid"]
-    company = agentManager.register_domain(name, domain, customerid)
+    company = agentManager.register_domain(name, domain)
     companies = agentManager.get_all_companies()
     if company["is_success"] == False:
         return {
@@ -204,8 +203,7 @@ def update_domain(current_user):
     id = data["id"]
     name = data["name"]
     domain = data["domain"]
-    customerid = data["customerid"]
-    ret = agentManager.update_domain(id, name, domain, customerid)
+    ret = agentManager.update_domain(id, name, domain)
     if ret == False:
         response = {
             "message": "Update domain failed.",
@@ -338,12 +336,14 @@ def editActkey(current_user):
 def deleteActkey(current_user):
     actkey_rid = request.args.get('id')
 
-    ret = agentManager.editActkeyStatus(actkey_rid, 0)
-    if ret == False:
-        return {
-            "message": "Edit Activation Key failed.",
-            "is_success": False
-        }
+    # ret = agentManager.editActkeyStatus(actkey_rid, 0)
+    # if ret == False:
+    #     return {
+    #         "message": "Edit Activation Key failed.",
+    #         "is_success": False
+    #     }
+    agentManager.deleteActkeyByID(actkey_rid)
+
     cusid = current_user["cusid"]
     actkeys = agentManager.getActkeysByCusId(cusid)
     return actkeys

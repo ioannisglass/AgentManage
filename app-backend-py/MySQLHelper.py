@@ -78,8 +78,8 @@ class AgentManage():
 
     # checked
     # register company and its domain
-    def register_domain(self, name, domain, customerid):
-        sel_query = f"SELECT * FROM tbl_companies WHERE `name` = '{name}' OR `domain` = '{domain}' OR `customerid` = '{customerid}';"
+    def register_domain(self, name, domain):
+        sel_query = f"SELECT * FROM tbl_companies WHERE `name` = '{name}' OR `domain` = '{domain}';"
         self.my_cursor.execute(sel_query)
         ds = self.my_cursor.fetchall()
         action_at = datetime.now().strftime("%m/%d/%Y %H:%M:%S")
@@ -94,6 +94,9 @@ class AgentManage():
                 "is_success": False
             }
         else:
+            customerid = self.generate_customer_id()
+            if customerid == '':
+                return None
             query = f"INSERT INTO tbl_companies (`name`, `domain`, `customerid`, `created_at`, `updated_at`) " + \
                 f"VALUES ('{name}', '{domain}', '{customerid}', '{action_at}', '{action_at}');"
             self.my_cursor.execute(query)
@@ -113,11 +116,11 @@ class AgentManage():
             
     # checked
     # update domain
-    def update_domain(self, id, name, domain, customerid):
+    def update_domain(self, id, name, domain):
         try:
             action_at = datetime.now().strftime("%m/%d/%Y %H:%M:%S")
             update_query = f"UPDATE `tbl_companies` SET `name` = '{name}', `domain` = '{domain}', " +\
-                f"`customerid` = '{customerid}', `updated_at` = '{action_at}' " + \
+                f"`updated_at` = '{action_at}' " + \
                 f"WHERE `id` = {id};"
             self.my_cursor.execute(update_query)
             self.my_db.commit()
@@ -161,7 +164,8 @@ class AgentManage():
                     "updated_at": row[5],
                 })
         return ret
-    
+
+    # checked
     # generate unique customer id
     def generate_customer_id(self):
         # new_cusid = ''.join(random.choices(string.ascii_letters + string.digits, k=16))
@@ -316,21 +320,22 @@ class AgentManage():
     def isActivated(self, customerid, actkey):
         query = f"SELECT tbl_companies.*, tbl_actkeys.actkey FROM tbl_companies LEFT JOIN tbl_actkeys " + \
             f"ON tbl_actkeys.cusid = tbl_companies.id WHERE tbl_companies.customerid = '{customerid}' " + \
-            f"AND tbl_actkeys.actkey = '{actkey}';"
+            f"AND tbl_actkeys.actkey = '{actkey}' AND tbl_actkeys.status = 2;"
         self.my_cursor.execute(query)
         ds = self.my_cursor.fetchall()
         if ds != None and len(ds) > 0:
             return "2"
         else:
-            query = f"SELECT tbl_companies.*, tbl_actkeys.actkey FROM tbl_companies LEFT JOIN tbl_actkeys " + \
-                f"ON tbl_actkeys.cusid = tbl_companies.id WHERE tbl_companies.customerid = '{customerid}' " + \
-                f"AND tbl_actkeys.actkey != '{actkey}';"
-            self.my_cursor.execute(query)
-            ds = self.my_cursor.fetchall()
-            if ds != None and len(ds) > 0:
-                return "1"
-            else:
-                return "0"
+            return "0"
+            # query = f"SELECT tbl_companies.*, tbl_actkeys.actkey FROM tbl_companies LEFT JOIN tbl_actkeys " + \
+            #     f"ON tbl_actkeys.cusid = tbl_companies.id WHERE tbl_companies.customerid = '{customerid}' " + \
+            #     f"AND tbl_actkeys.actkey != '{actkey}';"
+            # self.my_cursor.execute(query)
+            # ds = self.my_cursor.fetchall()
+            # if ds != None and len(ds) > 0:
+            #     return "1"
+            # else:
+            #     return "0"
     
     # Store data of agent to db
     def saveAgentData(self, data):
@@ -370,7 +375,7 @@ class AgentManage():
         self.my_cursor.execute(update_query)
         self.my_db.commit()
         # delete all apps to update with new list with agent row id
-        delete_query = f"DELETE FROM tbl_installedapps WHERE `agentid` = {agentrid}"
+        delete_query = f"DELETE FROM tbl_installedapps WHERE `agentid` = {agentrid};"
         self.my_cursor.execute(delete_query)
         self.my_db.commit()
         # add the installed apps to tbl_installedapps
@@ -389,6 +394,13 @@ class AgentManage():
             self.my_cursor.execute(query)
             self.my_db.commit()
         return True
+
+    # checked
+    # Delete Activation Key by its Row ID
+    def deleteActkeyByID(self, actkeyrid):
+        delete_query = f"DELETE FROM tbl_actkeys WHERE id = {actkeyrid};"
+        self.my_cursor.execute(delete_query)
+        self.my_db.commit()
     
     def getAgents(self, actkeyrowid):
         # query = f"SELECT tbl_agents.* FROM tbl_agents LEFT JOIN tbl_actkeys " + \
