@@ -15,7 +15,7 @@ const DomainsPage = () => {
     
     const [pDName, setPDName] = useState('');
     const [pDomain, setPDomain] = useState('');
-    const [pCustomerid, setPCustomerid] = useState('');
+    // const [pCustomerid, setPCustomerid] = useState('');
     const [pending, setPending] = useState(false);
     const navigate = useNavigate();
     const [showToastr, setShowToastr] = useState(false);
@@ -33,7 +33,7 @@ const DomainsPage = () => {
         setEditRow(index);
         setPDName(tableData[index].name);
         setPDomain(tableData[index].domain);
-        setPCustomerid(tableData[index].customerid)
+        // setPCustomerid(tableData[index].customerid)
     }
 
     const handleDomainEditOrAddCancled = () => {
@@ -45,7 +45,7 @@ const DomainsPage = () => {
         setPending(true);
         setPDName("");
         setPDomain("");
-        setPCustomerid("")
+        // setPCustomerid("")
     }
 
     const handleToastrClose = () => {
@@ -57,8 +57,7 @@ const DomainsPage = () => {
         API.updateDomain({
             id: tableData[editRow].id,
             name: pDName,
-            domain: pDomain,
-            customerid: pCustomerid
+            domain: pDomain
         })
             .then(res => setTableData(res.data))
             .catch(err => console.log(err))
@@ -74,8 +73,7 @@ const DomainsPage = () => {
         setPending(false);
         API.addDomain({
             name: pDName,
-            domain: pDomain,
-            customerid: pCustomerid
+            domain: pDomain
         })
             .then((res) => {
                 if(res.data.is_success === false) {
@@ -184,18 +182,7 @@ const DomainsPage = () => {
                                             }
                                         </td>
                                         <td className="px-6 py-3">
-                                            {
-                                                _i === editRow ?
-                                                    <input
-                                                        type="text" 
-                                                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                                                        value={pCustomerid}
-                                                        onChange={(e) => setPCustomerid(e.target.value)}
-                                                        required 
-                                                    />
-                                                        :
-                                                    one.customerid 
-                                            }
+                                            {one.customerid}
                                         </td>
                                         <td className="px-6 py-3 text-right">
                                             { 
@@ -272,13 +259,13 @@ const DomainsPage = () => {
                                     </td>
                                     <td className="px-6 py-3">
                                         <div>
-                                            <input 
+                                            {/* <input 
                                                 type="text" 
                                                 className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                                                 value={pCustomerid}
                                                 onChange={(e) => setPCustomerid(e.target.value)}
                                                 required 
-                                            />
+                                            /> */}
                                         </div>
                                     </td>
                                     <td className="px-6 py-3 text-right">
