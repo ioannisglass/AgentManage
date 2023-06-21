@@ -85,7 +85,7 @@ const ActkeysPage = () => {
     return (
         <>
             <div className='m-32'>
-                <div className='grid grid-cols-3 gap-4 p-2'>
+                <div className='grid grid-cols-2 gap-4 p-2'>
                     <div className='text-white text-2xl'>Activation Keys</div>
                     {/* <div className='text-white text-2xl'>Customer ID: {customerid}</div> */}
                     <div className='text-white justify-self-end'>

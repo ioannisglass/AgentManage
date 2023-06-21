@@ -1,6 +1,4 @@
 import LoginPage from "../auth/login"
-import IndexPage from "../pages/ActkeysPage"
-import UserPage from "../pages"
 
 import DetailPage from "../pages/detail"
 import DevicePage from "../pages/device"
@@ -8,9 +6,9 @@ import Documentation from '../pages/Documentation'
 import AllAppPage from "../pages/allapps"
 import RegisterPage from "../auth/register"
 import DomainsPage from "../pages/DomainsPage"
-import HomePage from "../pages"
 import ActkeysPage from "../pages/ActkeysPage"
 import UsersPage from "../pages/UsersPage"
+import FilesPage from "../pages/FilesPage"
 
 const routeConfigs = [
     { path: "/auth/login", element: <LoginPage /> },
@@ -25,7 +23,8 @@ const PrivateRoute = [
     { path: "/dactkeys/:id", element: <ActkeysPage/> },
     { path: "/detail/:id", element: <DetailPage/> },
     { path: "/device/:id", element: <DevicePage/> },
-    { path: "/allapp/:id", element: <AllAppPage/> }
+    { path: "/allapp/:id", element: <AllAppPage/> },
+    { path: "/downloads", element: <FilesPage/> }
 ]
 
 export default {
