@@ -1,6 +1,6 @@
 import axios from "axios";
 // require('dotenv').config()
-axios.defaults.baseURL = 'http://192.168.8.171:5000';
+axios.defaults.baseURL = 'http://127.0.0.1:5000';
 // axios.defaults.baseURL = process.env.REACT_APP_BASE_API_URL;
 
 export default {
