@@ -17,7 +17,6 @@ function* loginUser(userData) {
                 console.log(err.response.data)
                 throw err.response.data;
             });
-        console.log(json)
         yield put({
             type: "SET_CURRENT_USER",
             json: json

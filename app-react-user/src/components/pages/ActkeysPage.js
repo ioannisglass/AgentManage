@@ -28,7 +28,6 @@ const ActkeysPage = () => {
         console.log(id);
         API.getActkeys(id)
             .then((res) => { 
-                console.log(res.data);
                 setTableData(res.data);
              })
              .catch((err) => {
@@ -41,7 +40,7 @@ const ActkeysPage = () => {
             id: tableData[index].id,
             status : tableData[index].status === 2 ? 1 : 2
         })
-            .then(res => setTableData(res.data))
+        .then(res => setTableData(res.data))
     }
     const confirmDelete = () => {
         setShowModal(false);
@@ -69,7 +68,6 @@ const ActkeysPage = () => {
     }
 
     const handleAddItem = () => {
-        console.log('adding item...')
         setPending(false);
         API.addActKeyData({
             title: pTitle

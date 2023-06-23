@@ -50,7 +50,6 @@ const DomainsPage = () => {
 
     const handleToastrClose = () => {
         setShowToastr(false);
-        console.log('something');
     }
     
     const handleDomainEditFinished = () => {
@@ -92,7 +91,6 @@ const DomainsPage = () => {
     }
 
     useEffect(() => {
-        console.log(`cusid: ${cusid}, role: ${userRole}`)
         if(userRole == 0)
             navigate(`dactkeys/${cusid}`)
         else {

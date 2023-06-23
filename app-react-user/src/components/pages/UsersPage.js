@@ -35,7 +35,8 @@ const UsersPage = () => {
     const handleUserEditFinished = () => {
         API.updateUserData({
             name: tName,
-            id: tableData[editRow].id
+            id: tableData[editRow].id,              // selected user row id
+            did: id                                 // selected domain row id
         })
             .then(res => setTableData(res.data))
             .catch(err => console.log(err))

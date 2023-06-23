@@ -40,14 +40,15 @@ const FilesPage = () => {
   
         try {
            // Replace this URL with your server-side endpoint for handling file uploads
-            const response = await fetch("http://127.0.0.1:5000/api/uploader", {
+            const response = await fetch("https://api.vulnagent.com/api/uploader", {
+            // const response = await fetch("http://192.168.8.171:5000/api/uploader", {
             // const response = await fetch(process.env.REACT_APP_BASE_API_URL, {
                 method: "POST",
                 body: formData
             });
   
             if (response.ok) {
-                alert("File upload is  successfully");
+                alert("File upload is successfully");
             } else {
                 alert("Failed to upload the file due to errors");
             }
