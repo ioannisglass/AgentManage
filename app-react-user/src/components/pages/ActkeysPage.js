@@ -110,16 +110,19 @@ const ActkeysPage = () => {
                         <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                             <tr>
                                 <th scope="col" className="px-6 py-3">
+                                    Title
+                                </th>
+                                <th scope="col" className="px-6 py-3">
                                     Activation Key
                                 </th>
                                 <th scope="col" className="px-6 py-3">
                                     Agents
                                 </th>
                                 <th scope="col" className="px-6 py-3">
-                                    Date
+                                    Created
                                 </th>
                                 <th scope="col" className="px-6 py-3">
-                                    Title
+                                    Last Checked
                                 </th>
                                 <th scope="col" className="px-6 py-3">
                                     Status
@@ -134,8 +137,11 @@ const ActkeysPage = () => {
                                 tableData.map((one, _i) => 
                                     <tr className="bg-white border-t dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600" key={_i}>
                                         <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                            { one.actkey }
+                                            { one.title }
                                         </th>
+                                        <td className="px-6 py-4">
+                                            { one.actkey }
+                                        </td>
                                         <td className="px-6 py-4">
                                             { one.agents }
                                         </td>
@@ -143,7 +149,7 @@ const ActkeysPage = () => {
                                             { one.created }
                                         </td>
                                         <td className="px-6 py-4">
-                                            { one.title }
+                                            { one.updated_at }
                                         </td>
                                         <td className="px-6 py-4">
                                             { one.status === 0 && <span className="bg-red-100 text-red-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded dark:bg-red-900 dark:text-red-300">Deleted</span> }
