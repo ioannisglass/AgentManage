@@ -11,7 +11,6 @@ import uuid
 from  werkzeug.security import generate_password_hash, check_password_hash
 # from flask_mysqldb import MySQL
 # from flaskext.mysql import MySQL
-from Model.User import User
 import os
 
 SECRET_KEY = "155912E@!FAs"
@@ -481,4 +480,7 @@ def forbidden(e):
     }), 404
 
 if __name__ == '__main__':
-    app.run(host="192.168.8.171", port=5000, debug=True)
+    # app.run(host="192.168.8.171", port=5000, debug=True)
+    # app.run(host="192.168.8.171", port=5000, debug=False, ssl_context='adhoc')
+    # app.run(ssl_context='adhoc')
+    app.run(debug=False, host='192.168.8.171', port=5000)

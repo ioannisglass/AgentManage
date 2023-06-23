@@ -261,6 +261,7 @@ class AgentManage():
                     "title": row[6],
                     "actkey" : row[2],
                     "created" : row[4],
+                    "updated_at": row[5],
                     "status" : row[3],                 # enabled 2, disabled 1, deleted 0
                     "agents": row[8],
                     "created_by": row[7]
@@ -349,11 +350,16 @@ class AgentManage():
             return False
         actkeyrid = ds[0][0]
         
+        action_at = datetime.now().strftime("%m/%d/%Y %H:%M")
+        update_actkey_query = f"UPDATE `tbl_actkeys` SET `updated_at` = '{action_at}' " + \
+            f"WHERE `id` = {actkeyrid};"
+        self.my_cursor.execute(update_actkey_query)
+        self.my_db.commit()
+        
         os = data["osInfo"]
         version = data["version"]
         host = data["machineName"]
         installedApps = data["installedApps"]
-        action_at = datetime.now().strftime("%m/%d/%Y %H:%M")
         # check if the host is already existed
         query = f"SELECT * FROM tbl_agents WHERE `host` = '{host}' AND `actkeyid` = {actkeyrid};"
         self.my_cursor.execute(query)
