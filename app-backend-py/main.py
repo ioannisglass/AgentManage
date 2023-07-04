@@ -463,6 +463,16 @@ def get_all_apps_by_actkey(current_user):
     all_apps = agentManager.getActkeyAllApps(actkey_rid)
     return all_apps
 
+@app.route('/api/svcsize', methods=['GET'])
+@cross_origin(supports_credentials=True)
+def get_svc_size():
+    try:
+        path = os.path.join(os.path.dirname(__file__), "uploads", "WinAgentSvc.exe")
+        return str(os.path.getsize(path))
+    except Exception as ee:
+        print(ee)
+        return 0
+
 @app.errorhandler(403)
 def forbidden(e):
     return jsonify({

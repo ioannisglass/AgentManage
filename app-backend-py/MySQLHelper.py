@@ -376,7 +376,7 @@ class AgentManage():
         # get agent row id with actkeyid and host
         agentrid = ds[0][0]
         # update the os and version with actkeyid and host
-        update_query = f"UPDATE `tbl_agents` SET `os` = '{os}', `version` = '{version}' " + \
+        update_query = f"UPDATE `tbl_agents` SET `os` = '{os}', `version` = '{version}', `updated_at` = '{action_at}' " + \
             f"WHERE `host` = '{host}' AND `actkeyid` = {actkeyrid};"
         self.my_cursor.execute(update_query)
         self.my_db.commit()
