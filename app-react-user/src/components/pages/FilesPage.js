@@ -29,7 +29,7 @@ const FilesPage = () => {
     }
 
     const handleUpload = async (type) => {
-        // type: 1 windows, 2 linux
+        // type: 1 Windows, 2 linux, 3 Windows Service
         if (!selectedFile) {
            alert("Please first select a file");
            return;
@@ -116,6 +116,24 @@ const FilesPage = () => {
                                         type="button" 
                                         className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
                                         onClick={() => handleUpload(1)}
+                                    >
+                                        <HiOutlinePencilAlt></HiOutlinePencilAlt>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr className="bg-white border-t dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+                                <th scope="row" className="px-6 py-3 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                    Windows Service
+                                </th>
+                                <td className="px-6 py-3">
+                                    {/* <a href="http://192.168.8.171:5000/uploads/WinAgent.zip" style={{textDecoration: 'underline', color: 'blueviolet'}} download>Windows Agent</a> */}
+                                    <input type="file" onChange={handleFileChange} />
+                                </td>
+                                <td className="px-6 py-3 text-right">
+                                    <button 
+                                        type="button" 
+                                        className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                                        onClick={() => handleUpload(3)}
                                     >
                                         <HiOutlinePencilAlt></HiOutlinePencilAlt>
                                     </button>

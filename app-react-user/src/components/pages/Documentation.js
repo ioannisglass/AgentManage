@@ -35,9 +35,9 @@ const Documentation = () => {
                     {/* &nbsp;&nbsp;&nbsp;&nbsp;<a href={`${process.env.REACT_APP_BASE_API_URL}/uploads/WinAgent.zip`} style={{textDecoration: 'underline', color: 'blueviolet'}} download>Windows Agent</a><br/><br/> */}
                     &nbsp;&nbsp;&nbsp;&nbsp;<a href='https://api.vulnagent.com/uploads/WinAgent.zip' style={{textDecoration: 'underline', color: 'blueviolet'}} download>Windows Agent</a><br/><br/>
                     {/* &nbsp;&nbsp;&nbsp;&nbsp;<a href='http://192.168.8.171:5000/uploads/WinAgent.zip' style={{textDecoration: 'underline', color: 'blueviolet'}} download>Windows Agent</a><br/><br/> */}
-                    2. Run Command Prompt and go to the extracted directory. <br/><br/>
+                    2. Run Command Prompt as Administrator and go to the extracted directory. <br/><br/>
                     3. Run the command:<br/>
-                    &nbsp;&nbsp;&nbsp;&nbsp;WinAgentInstaller.exe {name.split('_')[1]} {name.split('_')[0]}<br/><br/>
+                    &nbsp;&nbsp;&nbsp;&nbsp;Start.exe {name.split('_')[1]} {name.split('_')[0]}<br/><br/>
                 </div>
             </div>
         </>

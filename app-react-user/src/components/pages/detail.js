@@ -69,7 +69,7 @@ const DetailPage = () => {
                                     OS Information
                                 </th>
                                 <th scope="col" className="px-6 py-3">
-                                    Updated At
+                                    Last Checked
                                 </th>
                                 <th scope="col" className="px-6 py-3">
                                     Version
