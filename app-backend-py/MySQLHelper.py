@@ -4,6 +4,7 @@ import uuid
 import secrets
 import random
 import string
+import json
 
 DATABASES = {
     'default': {
@@ -327,16 +328,16 @@ class AgentManage():
         if ds != None and len(ds) > 0:
             return "2"
         else:
-            return "0"
-            # query = f"SELECT tbl_companies.*, tbl_actkeys.actkey FROM tbl_companies LEFT JOIN tbl_actkeys " + \
-            #     f"ON tbl_actkeys.cusid = tbl_companies.id WHERE tbl_companies.customerid = '{customerid}' " + \
-            #     f"AND tbl_actkeys.actkey != '{actkey}';"
-            # self.my_cursor.execute(query)
-            # ds = self.my_cursor.fetchall()
-            # if ds != None and len(ds) > 0:
-            #     return "1"
-            # else:
-            #     return "0"
+            sel_cus_query = f"SELECT * FROM `tbl_companies` WHERE `customerid` = '{customerid}';"
+            self.my_cursor.execute(sel_cus_query)
+            ds_cus = self.my_cursor.fetchall()
+            sel_actkey_query = f"SELECT * FROM `tbl_actkeys` WHERE `actkey` = '{actkey}';"
+            self.my_cursor.execute(sel_actkey_query)
+            ds_actkey = self.my_cursor.fetchall()
+            if ds_cus != None and len(ds_cus) > 0 or ds_actkey != None and len(ds_actkey) > 0:
+                return "1"
+            else:
+                return "0"
     
     # Store data of agent to db
     def saveAgentData(self, data):
@@ -360,6 +361,7 @@ class AgentManage():
         version = data["version"]
         host = data["machineName"]
         installedApps = data["installedApps"]
+        json_apps = json.dumps(installedApps)
         # check if the host is already existed
         query = f"SELECT * FROM tbl_agents WHERE `host` = '{host}' AND `actkeyid` = {actkeyrid};"
         self.my_cursor.execute(query)
@@ -381,23 +383,18 @@ class AgentManage():
         self.my_cursor.execute(update_query)
         self.my_db.commit()
         # delete all apps to update with new list with agent row id
-        delete_query = f"DELETE FROM tbl_installedapps WHERE `agentid` = {agentrid};"
-        self.my_cursor.execute(delete_query)
-        self.my_db.commit()
-        # add the installed apps to tbl_installedapps
-        if installedApps != None and len(installedApps) > 0:
-            query = f"INSERT INTO tbl_installedapps (name, version, agentid) VALUES "
-            first_line = True
-            for installed_app in installedApps:
-                name = installed_app["displayName"]
-                version = installed_app["displayVersion"]
-                sub_query = f"('{name}', '{version}', '{agentrid}')"
-                if first_line == False:
-                    query = query + ', '
-                query = query + sub_query
-                first_line = False
-            query += ';'
-            self.my_cursor.execute(query)
+        select_apps_query = f"SELECT * FROM tbl_installedapps WHERE `agentid` = {agentrid};"
+        self.my_cursor.execute(select_apps_query)
+        ds_apps = self.my_cursor.fetchall()
+        if ds_apps == None or len(ds_apps) == 0:
+            ins_apps_query = f"INSERT INTO `tbl_installedapps` (agentid, apps, created_at, updated_at) VALUES " + \
+                f"({agentrid}, '{json_apps}', '{action_at}', '{action_at}');"
+            self.my_cursor.execute(ins_apps_query)
+            self.my_db.commit()
+        else:
+            upd_apps_query = f"UPDATE `tbl_installedapps` SET `apps` = '{json_apps}', `updated_at` ='{action_at}' " + \
+                f"WHERE `agentid` = {agentrid};"
+            self.my_cursor.execute(upd_apps_query)
             self.my_db.commit()
         return True
 
@@ -406,6 +403,23 @@ class AgentManage():
     def deleteActkeyByID(self, actkeyrid):
         delete_query = f"DELETE FROM tbl_actkeys WHERE id = {actkeyrid};"
         self.my_cursor.execute(delete_query)
+        self.my_db.commit()
+        # select all agents that has this activation key
+        sel_agents_query = f"SELECT * FROM tbl_agents WHERE `actkeyid` = {actkeyrid};"
+        self.my_cursor.execute(sel_agents_query)
+        ds = self.my_cursor.fetchall()
+        where_ids = ''
+        if ds != None and len(ds) > 0:
+            for row in ds:
+                where_ids += f"agentid = {row[0]} OR "
+            where_ids = where_ids[:len(where_ids) - 4]
+        if where_ids != '':
+            del_apps_query = f"DELETE FROM `tbl_installedapps` WHERE {where_ids};"
+            self.my_cursor.execute(del_apps_query)
+            self.my_db.commit()
+        
+        del_agents_query = f"DELETE FROM tbl_agents WHERE `actkeyid` = {actkeyrid};"
+        self.my_cursor.execute(del_agents_query)
         self.my_db.commit()
     
     def getAgents(self, actkeyrowid):
@@ -445,11 +459,7 @@ class AgentManage():
         ds = self.my_cursor.fetchall()
         ret = []
         if ds != None and len(ds) > 0:
-            for row in ds:
-                ret.append({
-                    "name": row[2],
-                    "version": row[3],
-                })
+            ret = json.loads(ds[0][2])
         return ret
     
     # Get all Applications installed at the all Agents that has the indicated Activation Key
@@ -469,10 +479,6 @@ class AgentManage():
         self.my_cursor.execute(query)
         ds1 = self.my_cursor.fetchall()
         if ds1 != None and len(ds1) > 0:
-            for row in ds1:
-                ret.append({
-                    "name": row[2],
-                    "version": row[3],
-                })
+            ret = json.loads(ds1[0][2])
         return ret
         
