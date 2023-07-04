@@ -58,7 +58,7 @@ const DevicePage = () => {
                                             { one.name }
                                         </th>
                                         <td className="px-6 py-4">
-                                            { one.version }
+                                            { one.ver }
                                         </td>
                                     </tr>
                                 )
