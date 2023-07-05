@@ -342,7 +342,7 @@ class AgentManage():
     # Store data of agent to db
     def saveAgentData(self, data):
         actkey = data["auth"]["actkey"]
-        cusid = data["auth"]["cusid"]
+        customerid = data["auth"]["customerid"]
         # After login, this function is executed, so do not need to check validation of actkey and cusid
         actkeyrid_sel_query = f"SELECT id FROM tbl_actkeys WHERE actkey = '{actkey}';"
         self.my_cursor.execute(actkeyrid_sel_query)
