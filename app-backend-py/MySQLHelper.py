@@ -25,6 +25,8 @@ class AgentManage():
         self.db_pass = db_pass
         self.db_name = db_name
         
+    # there is timeout, so before function calling, this function has to be called first
+    def connectToDB(self):
         self.my_db = mysql.connector.connect(
             host=self.db_host,
             user=self.db_user,
@@ -33,8 +35,9 @@ class AgentManage():
             database=self.db_name
         )
         self.my_cursor = self.my_db.cursor()
-        
+    
     def getUserByID(self, id):
+        self.connectToDB()
         query = f"SELECT * FROM tbl_users WHERE id = {id};"
         self.my_cursor.execute(query)
         ds = self.my_cursor.fetchall()
@@ -53,6 +56,7 @@ class AgentManage():
             }
         
     def getUserByEmail(self, email):
+        self.connectToDB()
         query = f"SELECT * FROM tbl_users WHERE email = '{email}';"
         self.my_cursor.execute(query)
         ds = self.my_cursor.fetchall()
@@ -71,6 +75,7 @@ class AgentManage():
             }
     
     def addUser(self, email, password, name, role, company_id):
+        self.connectToDB()
         action_at = datetime.now().strftime("%m/%d/%Y %H:%M:%S")
         query = f"INSERT INTO tbl_users (email, password, cusid, created_at, updated_at, name, role) " + \
             f"VALUES ('{email}', '{password}', {company_id}, '{action_at}', '{action_at}', '{name}', {role});"
@@ -80,6 +85,7 @@ class AgentManage():
     # checked
     # register company and its domain
     def register_domain(self, name, domain):
+        self.connectToDB()
         sel_query = f"SELECT * FROM tbl_companies WHERE `name` = '{name}' OR `domain` = '{domain}';"
         self.my_cursor.execute(sel_query)
         ds = self.my_cursor.fetchall()
@@ -118,6 +124,7 @@ class AgentManage():
     # checked
     # update domain
     def update_domain(self, id, name, domain):
+        self.connectToDB()
         try:
             action_at = datetime.now().strftime("%m/%d/%Y %H:%M:%S")
             update_query = f"UPDATE `tbl_companies` SET `name` = '{name}', `domain` = '{domain}', " +\
@@ -132,6 +139,7 @@ class AgentManage():
     
     # get company from domain
     def get_company_by_domain(self, domain):
+        self.connectToDB()
         sel_query = f"SELECT * FROM tbl_companies WHERE `domain` = '{domain}';"
         self.my_cursor.execute(sel_query)
         ds = self.my_cursor.fetchall()
@@ -150,6 +158,7 @@ class AgentManage():
     # checked
     # get all domains
     def get_all_companies(self):
+        self.connectToDB()
         sel_query = f"SELECT * FROM tbl_companies;"
         self.my_cursor.execute(sel_query)
         ds = self.my_cursor.fetchall()
@@ -169,6 +178,7 @@ class AgentManage():
     # checked
     # generate unique customer id
     def generate_customer_id(self):
+        self.connectToDB()
         # new_cusid = ''.join(random.choices(string.ascii_letters + string.digits, k=16))
         # customer_id = str(uuid.uuid1())
         new_cusid = ''.join(random.choices(string.digits, k=16))
@@ -189,6 +199,7 @@ class AgentManage():
     
     def editUserByID(self, userrid, name):
         try:
+            self.connectToDB()
             action_at = datetime.now().strftime("%m/%d/%Y %H:%M:%S")
             update_query = f"UPDATE `tbl_users` SET `name` = '{name}', `updated_at` = '{action_at}' " + \
                 f"WHERE `id` = {userrid};"
@@ -202,6 +213,7 @@ class AgentManage():
     # checked
     # get All users by company id
     def getUsersByDomainRid(self, company_id):
+        self.connectToDB()
         # query = f"SELECT * FROM tbl_users WHERE `role` = 0 AND `cusid` = {company_id};"
         query = f"SELECT * FROM tbl_users WHERE `cusid` = {company_id};"
         self.my_cursor.execute(query)
@@ -223,6 +235,7 @@ class AgentManage():
     
     # checked
     def signIn(self, email, password):
+        self.connectToDB()
         query = f"SELECT tbl_users.id, tbl_users.cusid, tbl_users.role, " +\
             f"tbl_companies.name, tbl_companies.customerid FROM tbl_users " +\
             f"LEFT JOIN tbl_companies " +\
@@ -251,6 +264,7 @@ class AgentManage():
     # checked
     # get All Activation Keys by cusid
     def getActkeysByCusId(self, cusid):
+        self.connectToDB()
         query = f"SELECT tbl_actkeys.*, COUNT(tbl_agents.id) as actkeycount FROM tbl_actkeys LEFT JOIN tbl_agents ON tbl_actkeys.id = tbl_agents.actkeyid WHERE tbl_actkeys.cusid = {cusid} GROUP BY tbl_actkeys.id;"
         self.my_cursor.execute(query)
         ds = self.my_cursor.fetchall()
@@ -272,6 +286,7 @@ class AgentManage():
     # checked
     # get Activation Key by Row ID
     def getActkeyByRowId(self, rowid):
+        self.connectToDB()
         query = f"SELECT tbl_actkeys.*, tbl_companies.customerid FROM tbl_actkeys " +\
             f"LEFT JOIN tbl_companies ON tbl_companies.id = tbl_actkeys.cusid WHERE tbl_actkeys.id = {rowid};"
         self.my_cursor.execute(query)
@@ -294,6 +309,7 @@ class AgentManage():
     # edit the status of Activation Key with Row ID    
     def editActkeyStatus(self, rowid, status):
         try:
+            self.connectToDB()
             action_at = datetime.now().strftime("%m/%d/%Y %H:%M:%S")
             update_query = f"UPDATE `tbl_actkeys` SET `status` = {status}, `updated_at` = '{action_at}' " + \
                 f"WHERE `id` = {rowid};"
@@ -306,6 +322,7 @@ class AgentManage():
         
     def addNewActkey(self, userid, title, cusid):
         try:
+            self.connectToDB()
             action_at = datetime.now().strftime("%m/%d/%Y %H:%M:%S")
             # actkey = secrets.token_hex(16)
             actkey = str(uuid.uuid4())
@@ -320,6 +337,7 @@ class AgentManage():
 
     # checked
     def isActivated(self, customerid, actkey):
+        self.connectToDB()
         query = f"SELECT tbl_companies.*, tbl_actkeys.actkey FROM tbl_companies LEFT JOIN tbl_actkeys " + \
             f"ON tbl_actkeys.cusid = tbl_companies.id WHERE tbl_companies.customerid = '{customerid}' " + \
             f"AND tbl_actkeys.actkey = '{actkey}' AND tbl_actkeys.status = 2;"
@@ -341,6 +359,7 @@ class AgentManage():
     
     # Store data of agent to db
     def saveAgentData(self, data):
+        self.connectToDB()
         actkey = data["auth"]["actkey"]
         customerid = data["auth"]["customerid"]
         # After login, this function is executed, so do not need to check validation of actkey and cusid
@@ -401,6 +420,7 @@ class AgentManage():
     # checked
     # Delete Activation Key by its Row ID
     def deleteActkeyByID(self, actkeyrid):
+        self.connectToDB()
         delete_query = f"DELETE FROM tbl_actkeys WHERE id = {actkeyrid};"
         self.my_cursor.execute(delete_query)
         self.my_db.commit()
@@ -423,6 +443,7 @@ class AgentManage():
         self.my_db.commit()
     
     def getAgents(self, actkeyrowid):
+        self.connectToDB()
         # query = f"SELECT tbl_agents.* FROM tbl_agents LEFT JOIN tbl_actkeys " + \
         #     f"ON tbl_agents.actkeyid = tbl_actkeys.id LEFT JOIN tbl_users ON tbl_users.id = tbl_actkeys.userid " + \
         #     f"WHERE tbl_actkeys.id = {actkeyrowid} AND tbl_users.id = {cusrowid};"
@@ -444,6 +465,7 @@ class AgentManage():
     
     # By Row ID, get the Agent from database
     def getAgentByID(self, rowid):
+        self.connectToDB()
         query = f"SELECT * FROM tbl_agents WHERE id = {rowid};"
         self.my_cursor.execute(query)
         ds = self.my_cursor.fetchall()
@@ -454,6 +476,7 @@ class AgentManage():
             return None
     
     def getAgentApps(self, agentid):
+        self.connectToDB()
         query = f"SELECT * FROM `tbl_installedapps` WHERE agentid = {agentid};"
         self.my_cursor.execute(query)
         ds = self.my_cursor.fetchall()
@@ -464,6 +487,7 @@ class AgentManage():
     
     # Get all Applications installed at the all Agents that has the indicated Activation Key
     def getActkeyAllApps(self, actkey_rid):
+        self.connectToDB()
         query = f"SELECT id FROM `tbl_agents` WHERE actkeyid = {actkey_rid};"
         self.my_cursor.execute(query)
         ds = self.my_cursor.fetchall()
