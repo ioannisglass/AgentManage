@@ -12,6 +12,7 @@ from  werkzeug.security import generate_password_hash, check_password_hash
 # from flask_mysqldb import MySQL
 # from flaskext.mysql import MySQL
 import os
+import hashlib
 
 SECRET_KEY = "155912E@!FAs"
 
@@ -468,10 +469,11 @@ def get_all_apps_by_actkey(current_user):
 def get_svc_size():
     try:
         path = os.path.join(os.path.dirname(__file__), "uploads", "WinAgentSvc.exe")
-        return str(os.path.getsize(path))
+        # return str(os.path.getsize(path))
+        return hashlib.md5(open(path, 'rb').read()).hexdigest()
     except Exception as ee:
         print(ee)
-        return 0
+        return ""
 
 @app.errorhandler(403)
 def forbidden(e):
