@@ -502,7 +502,32 @@ class AgentManage():
         query = f"SELECT * FROM `tbl_installedapps` WHERE {where_ids};"
         self.my_cursor.execute(query)
         ds1 = self.my_cursor.fetchall()
-        if ds1 != None and len(ds1) > 0:
-            ret = json.loads(ds1[0][2])
-        return ret
+        if ds1 == None or len(ds1) == 0:
+            return ret
         
+        dict = {}
+        for row in ds1:
+            apps = json.loads(row[2])
+            for app in apps:
+                key = f"{app['name']}_{app['ver']}"
+                if not key in dict:
+                    dict[key] = app
+        return list(dict.values())
+    
+    def getAgentsToUninstall(self, actkey_rid, app):
+        self.connectToDB()
+        query = f"SELECT `tbl_installedapps`.`agentid`, `tbl_agents`.`host` FROM `tbl_installedapps` LEFT JOIN `tbl_agents` ON " + \
+            f"`tbl_agents`.`id` = `tbl_installedapps`.`agentid` " + \
+            f"WHERE `tbl_agents`.`actkeyid` = {actkey_rid} AND " + \
+            f"`tbl_installedapps`.`apps` LIKE '%\"name\": \"{app}\",%';"
+        ret = []
+        self.my_cursor.execute(query)
+        ds = self.my_cursor.fetchall()
+        if ds == None or len(ds) == 0:
+            return ret
+        for row in ds:
+            ret.append({
+                "id": row[0],
+                "host": row[1]
+            })
+        return ret

@@ -474,6 +474,14 @@ def get_svc_size():
     except Exception as ee:
         print(ee)
         return ""
+    
+@app.route('/api/remdev', methods=['GET'])
+@cross_origin(supports_credentials=True)
+def get_agents_to_remove():
+    actkey_rid = request.args.get('id')
+    app = request.args.get('app')
+    agents = agentManager.getAgentsToUninstall(actkey_rid, app)
+    return agents
 
 @app.errorhandler(403)
 def forbidden(e):
