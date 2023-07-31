@@ -37,9 +37,6 @@ export default {
     getDeviceData: function (id) {
         return axios.get(`/api/device?id=${id}`);
     },
-    getDeviceData: function (id) {
-        return axios.get(`/api/device?id=${id}`);
-    },
     getAllAppData: function (id) {
         return axios.get(`api/allapps?id=${id}`);
     },
@@ -54,5 +51,11 @@ export default {
     },
     updateDomain: function(updated_domain) {
         return axios.put(`/api/domain`, updated_domain)
+    },
+    getAgentsToRem: function(aid, app) {
+        return axios.get(`/api/remdev?id=${aid}&app=${app}`)
+    },
+    uninstallApps: function(data) {
+        return axios.post(`/api/uninstall`, data)
     }
 }

@@ -1,19 +1,21 @@
 import React, { useEffect, useState } from 'react';
-
+import { HiTrash } from 'react-icons/hi'
 import API from "../../api/api";
 import { useParams, useNavigate } from 'react-router';
 
 const AllAppPage = () => {
     
     const [tableData, setTableData] = useState([]);
+    const [pLabel, setLabel] = useState('');
     const { id } = useParams();
     const navigate = useNavigate();
 
-    const handleRowClicked = (id) => {
-        navigate(`/device/${id}`);
+    const handleDelApp = (app) => {
+        navigate(`/remove/${id}/${app}`);
     }
 
     useEffect(() => {
+        setLabel('Detail');
         API.getAllAppData(id)
             .then((res) => { 
                 setTableData(res.data);
@@ -27,7 +29,7 @@ const AllAppPage = () => {
         <>
             <div className='m-32'>
                 <div className='grid grid-cols-2 gap-4 p-2'>
-                    <div className='text-white text-2xl'>Detail</div>
+                    <div className='text-white text-2xl'>{pLabel}</div>
                     <div className='text-white justify-self-end'>
                         <button 
                             type="button" 
@@ -48,6 +50,9 @@ const AllAppPage = () => {
                                 <th scope="col" className="px-6 py-3">
                                     Version
                                 </th>
+                                <th scope="col" className="px-6 py-3">
+                                    <span className="sr-only">Edit</span>
+                                </th>
                             </tr>
                         </thead>
                         <tbody>
@@ -58,8 +63,17 @@ const AllAppPage = () => {
                                             { one.name }
                                         </th>
                                         <td className="px-6 py-4">
-                                            { one.version }
+                                            { one.ver }
                                         </td>
+                                        <td className="px-6 py-4 text-right">
+                                        <button 
+                                            type="button" 
+                                            className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                                            onClick={() => handleDelApp(one.name)}
+                                        >
+                                            <HiTrash/>
+                                        </button>
+                                    </td>
                                     </tr>
                                 )
                             }

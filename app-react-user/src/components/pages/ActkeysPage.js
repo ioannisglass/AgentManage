@@ -26,7 +26,6 @@ const ActkeysPage = () => {
     const userRole = useSelector(state => state.authReducer.user.role)
     
     useEffect(() => {
-        console.log(id);
         API.getActkeys(id)
             .then((res) => { 
                 setTableData(res.data);

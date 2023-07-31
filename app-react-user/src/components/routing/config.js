@@ -9,6 +9,7 @@ import DomainsPage from "../pages/DomainsPage"
 import ActkeysPage from "../pages/ActkeysPage"
 import UsersPage from "../pages/UsersPage"
 import FilesPage from "../pages/FilesPage"
+import RemAppPage from "../pages/RemAppPage"
 
 const routeConfigs = [
     { path: "/auth/login", element: <LoginPage /> },
@@ -24,7 +25,8 @@ const PrivateRoute = [
     { path: "/detail/:id", element: <DetailPage/> },
     { path: "/device/:id", element: <DevicePage/> },
     { path: "/allapp/:id", element: <AllAppPage/> },
-    { path: "/downloads", element: <FilesPage/> }
+    { path: "/downloads", element: <FilesPage/> },
+    { path: "/remove/:aid/:app", element: <RemAppPage/> }
 ]
 
 export default {
