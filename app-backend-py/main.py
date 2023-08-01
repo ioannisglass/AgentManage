@@ -483,6 +483,25 @@ def get_agents_to_remove():
     agents = agentManager.getAgentsToUninstall(actkey_rid, app)
     return agents
 
+@app.route('/api/uninstall', methods=['POST'])
+@cross_origin(supports_credentials=True)
+def uninstall_apps():
+    data = request.get_json()
+    hosts = data['hosts']
+    app = data['app']
+    response = {}
+    if hosts == None or len(hosts) == 0:
+        response["is_success"] = False
+        response["msg"] = 'No hosts.'
+    if app == None or app == '':
+        response["is_success"] = False
+        response["msg"] = 'No application to uninstall.'
+        
+    agentManager.addAppsToUninstall(hosts, app)
+    response["is_success"] = True
+    response["data"] = data
+    return response
+
 @app.errorhandler(403)
 def forbidden(e):
     return jsonify({

@@ -406,12 +406,12 @@ class AgentManage():
         self.my_cursor.execute(select_apps_query)
         ds_apps = self.my_cursor.fetchall()
         if ds_apps == None or len(ds_apps) == 0:
-            ins_apps_query = f"INSERT INTO `tbl_installedapps` (agentid, apps, created_at, updated_at) VALUES " + \
-                f"({agentrid}, '{json_apps}', '{action_at}', '{action_at}');"
+            ins_apps_query = f"INSERT INTO `tbl_installedapps` (agentid, apps, created_at, updated_at, uninstall) VALUES " + \
+                f"({agentrid}, '{json_apps}', '{action_at}', '{action_at}', '');"
             self.my_cursor.execute(ins_apps_query)
             self.my_db.commit()
         else:
-            upd_apps_query = f"UPDATE `tbl_installedapps` SET `apps` = '{json_apps}', `updated_at` ='{action_at}' " + \
+            upd_apps_query = f"UPDATE `tbl_installedapps` SET `apps` = '{json_apps}', `updated_at` ='{action_at}', `uninstall` = '' " + \
                 f"WHERE `agentid` = {agentrid};"
             self.my_cursor.execute(upd_apps_query)
             self.my_db.commit()
@@ -531,3 +531,26 @@ class AgentManage():
                 "host": row[1]
             })
         return ret
+    
+    def addAppsToUninstall(self, hosts, app):
+        self.connectToDB()
+        if hosts == None or len(hosts) == 0:
+            return
+        for host in hosts:
+            query = f"SELECT `tbl_installedapps`.'uninstall' FROM `tbl_installedapps` " + \
+                f"LEFT JOIN `tbl_agents` ON `tbl_agents`.`id` = `tbl_installedapps`.`agentid` " + \
+                f"WHERE `tbl_agents`.`host` = '{host}';"
+            self.my_cursor.execute(query)
+            ds = self.my_cursor.fetchall()
+            apps = []
+            if ds != None and len(ds) > 0:
+                if ds[0][0] != None and ds[0][0] != '':
+                    apps = json.loads(ds[0][0])
+            apps.append(app)
+            json_apps = json.dumps(apps)
+            update_query = f"UPDATE `tbl_installedapps` " + \
+                f"LEFT JOIN `tbl_agents` ON `tbl_agents`.`id` = `tbl_installedapps`.`agentid` " + \
+                f"SET `tbl_installedapps`.`uninstall` = '{json_apps}' " + \
+                f"WHERE `tbl_agents`.`host` = '{host}';"
+            self.my_cursor.execute(update_query)
+            self.my_db.commit()
