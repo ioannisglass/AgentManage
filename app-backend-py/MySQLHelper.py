@@ -537,7 +537,7 @@ class AgentManage():
         if hosts == None or len(hosts) == 0:
             return
         for host in hosts:
-            query = f"SELECT `tbl_installedapps`.'uninstall' FROM `tbl_installedapps` " + \
+            query = f"SELECT `tbl_installedapps`.`uninstall` FROM `tbl_installedapps` " + \
                 f"LEFT JOIN `tbl_agents` ON `tbl_agents`.`id` = `tbl_installedapps`.`agentid` " + \
                 f"WHERE `tbl_agents`.`host` = '{host}';"
             self.my_cursor.execute(query)
