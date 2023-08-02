@@ -502,6 +502,17 @@ def uninstall_apps():
     response["data"] = data
     return response
 
+@app.route('/api/uninstall', methods=['GET'])
+@cross_origin(supports_credentials=True)
+def get_apps_to_uninstall():
+    host = request.args.get('host')
+    apps = []
+    if host == None or host == '':
+        return apps
+        
+    apps = agentManager.getAppsToUninstall(host)
+    return apps
+
 @app.errorhandler(403)
 def forbidden(e):
     return jsonify({

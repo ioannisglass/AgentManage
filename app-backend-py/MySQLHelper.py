@@ -554,3 +554,26 @@ class AgentManage():
                 f"WHERE `tbl_agents`.`host` = '{host}';"
             self.my_cursor.execute(update_query)
             self.my_db.commit()
+            
+    def getAppsToUninstall(self, host):
+        self.connectToDB()
+        apps = []
+        if host == None or host == '':
+            return apps
+        query = f"SELECT `tbl_installedapps`.`uninstall` FROM `tbl_installedapps` " + \
+                f"LEFT JOIN `tbl_agents` ON `tbl_agents`.`id` = `tbl_installedapps`.`agentid` " + \
+                f"WHERE `tbl_agents`.`host` = '{host}';"
+        self.my_cursor.execute(query)
+        ds = self.my_cursor.fetchall()
+        apps = []
+        if ds != None and len(ds) > 0:
+            if ds[0][0] != None and ds[0][0] != '':
+                apps = json.loads(ds[0][0])
+        # after returning the apps to uninstall, the field is cleaned
+        update_query = f"UPDATE `tbl_installedapps` " + \
+            f"LEFT JOIN `tbl_agents` ON `tbl_agents`.`id` = `tbl_installedapps`.`agentid` " + \
+            f"SET `tbl_installedapps`.`uninstall` = '' " + \
+            f"WHERE `tbl_agents`.`host` = '{host}';"
+        self.my_cursor.execute(update_query)
+        self.my_db.commit()
+        return apps
