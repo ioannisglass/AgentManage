@@ -52,8 +52,8 @@ export default {
     updateDomain: function(updated_domain) {
         return axios.put(`/api/domain`, updated_domain)
     },
-    getAgentsToRem: function(aid, app) {
-        return axios.get(`/api/remdev?id=${aid}&app=${app}`)
+    getAgentsToRem: function(aid, app, ver) {
+        return axios.get(`/api/remdev?id=${aid}&app=${app}&ver=${ver}`)
     },
     uninstallApps: function(data) {
         return axios.post(`/api/uninstall`, data)

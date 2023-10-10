@@ -7,7 +7,7 @@ const RemAppPage = () => {
     
     const [tableData, setTableData] = useState([]);
     const [checkboxes, setCheckboxes] = useState([]);
-    const { aid, app } = useParams();
+    const { aid, app, ver } = useParams();
     const navigate = useNavigate();
     const [showModal, setShowModal] = useState(false);
 
@@ -35,6 +35,7 @@ const RemAppPage = () => {
         API.uninstallApps({
             aid: aid,
             app: app,
+            ver: ver,
             hosts: selectedValues
         })
         .then(
@@ -46,7 +47,7 @@ const RemAppPage = () => {
     }
 
     useEffect(() => {
-        API.getAgentsToRem(aid, app)
+        API.getAgentsToRem(aid, app, ver)
             .then((res) => { 
                 const initialCheckboxes = []
                 res.data.map((one, _i) => {

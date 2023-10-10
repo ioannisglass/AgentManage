@@ -26,7 +26,7 @@ const PrivateRoute = [
     { path: "/device/:id", element: <DevicePage/> },
     { path: "/allapp/:id", element: <AllAppPage/> },
     { path: "/downloads", element: <FilesPage/> },
-    { path: "/remove/:aid/:app", element: <RemAppPage/> }
+    { path: "/remove/:aid/:app/:ver", element: <RemAppPage/> }
 ]
 
 export default {
