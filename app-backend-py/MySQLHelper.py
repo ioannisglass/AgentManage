@@ -532,7 +532,7 @@ class AgentManage():
             })
         return ret
     
-    def addAppsToUninstall(self, hosts, app):
+    def addAppsToUninstall(self, hosts, app, ver):
         self.connectToDB()
         if hosts == None or len(hosts) == 0:
             return
@@ -546,7 +546,7 @@ class AgentManage():
             if ds != None and len(ds) > 0:
                 if ds[0][0] != None and ds[0][0] != '':
                     apps = json.loads(ds[0][0])
-            apps.append(app)
+            apps.append(f'{app}_{ver}')
             json_apps = json.dumps(apps)
             update_query = f"UPDATE `tbl_installedapps` " + \
                 f"LEFT JOIN `tbl_agents` ON `tbl_agents`.`id` = `tbl_installedapps`.`agentid` " + \

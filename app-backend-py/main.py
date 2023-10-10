@@ -489,6 +489,7 @@ def uninstall_apps():
     data = request.get_json()
     hosts = data['hosts']
     app = data['app']
+    ver = data['ver']
     response = {}
     if hosts == None or len(hosts) == 0:
         response["is_success"] = False
@@ -497,7 +498,7 @@ def uninstall_apps():
         response["is_success"] = False
         response["msg"] = 'No application to uninstall.'
         
-    agentManager.addAppsToUninstall(hosts, app)
+    agentManager.addAppsToUninstall(hosts, app, ver)
     response["is_success"] = True
     response["data"] = data
     return response
